@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://cjblog.github.io</id>
+    <title>土豆不吃鱼</title>
+    <updated>2024-12-14T14:07:20.667Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://cjblog.github.io"/>
+    <link rel="self" href="https://cjblog.github.io/atom.xml"/>
+    <subtitle>做真实的自己，随遇而安</subtitle>
+    <logo>https://cjblog.github.io/images/avatar.png</logo>
+    <icon>https://cjblog.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2024, 土豆不吃鱼</rights>
+    <entry>
+        <title type="html"><![CDATA[最近开始裁员]]></title>
+        <id>https://cjblog.github.io/post/zui-jin-kai-shi-cai-yuan/</id>
+        <link href="https://cjblog.github.io/post/zui-jin-kai-shi-cai-yuan/">
+        </link>
+        <updated>2024-11-12T07:56:59.000Z</updated>
+        <summary type="html"><![CDATA[<p>今年又是没有目标随性的一年，每天便是重复上班，下班。在这家公司已经工作了三年半时间，最近公司开始裁员了。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>今年又是没有目标随性的一年，每天便是重复上班，下班。在这家公司已经工作了三年半时间，最近公司开始裁员了。</p>
+<!-- more -->
+<p>对于裁员这件事，我们早就有心理准备了。一直不赚钱，产品疯狂迭代了三年多，却只有七个客户，成本每年大约3千万左右吧，所以财源是迟早的事情。</p>
+<p>其实我也不清楚裁员以后，我做什么去，做工程师吧完全没有成就感，虽然我一直提醒自己，工作有工资了，不要奢望从中获得成就感。但这样的工作实在是无聊，我觉得做算法工程师不断提升模型的能力，是一件很有意思的事，研究新技术也是很有激情的事情，但工作中几乎用不上，甚至工作内容都些无聊，而没有价值的垃圾琐事，所谓面试造火箭工作打螺丝，真是没错。每次技术提升全靠在面试过程中整理的八股文，学习一些技术资料。工作中几乎没有提升。</p>
+<p>不知道这次产品停了，那些辛苦加班赶着做版本迭代的人内心是什么想法？他们会有失落吗？我觉得他们为了目标干了三年多的时间，他们应该很不甘心，因为他们的付出却没有得到相应的回报，这是我的想法。</p>
+<p>而我们算法呢，几乎回到了原点，从我进公司开始，产品里只有很少的算法模型，到今天为止三年多的时间，产品里仍然还是只有很少的算法，我不禁要问，我们的价值在哪里，存在的意义是什么呢？</p>
+<p>应该负责任的是一号领导，傻逼 2 号领导完全没有决策权，当然跟我们一样，连负责任的资格都没有。2号领导学历也挺好的，是如何做到每天笑呵呵的工作，一切照旧似乎什么都没有发生过一样，真是大智若愚呀，在下实在佩服甘拜下风。</p>
+<p>我喜欢算法，更崇拜操作系统及其原理，计算机是无数科学家不断优化设计出的工艺品，尤其是计算机的发展史，满是工程师文化，非常吸引我。哎！既然不能当成工作，那就当成爱好吧，毕竟换一份工作和行业也不难，我同样热爱着教育事业。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Ollama介绍与使用指南]]></title>
+        <id>https://cjblog.github.io/post/ollama-jie-shao-yu-shi-yong-zhi-nan/</id>
+        <link href="https://cjblog.github.io/post/ollama-jie-shao-yu-shi-yong-zhi-nan/">
+        </link>
+        <updated>2024-09-28T03:05:36.000Z</updated>
+        <summary type="html"><![CDATA[<p>Ollama 是一个强大的本地推理大模型平台，旨在简化模型的本地部署、管理和推理工作流。它允许用户在本地机器上拉取、管理、运行大模型，并提供多种访问方式，包括本地 CLI、HTTP 接口以及通过 OpenAI 客户端的集成。这篇文章将详细介绍 Ollama 的功能，如何使用 Ollama 拉取模型、运行模型，并通过多种方式访问推理服务。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>Ollama 是一个强大的本地推理大模型平台，旨在简化模型的本地部署、管理和推理工作流。它允许用户在本地机器上拉取、管理、运行大模型，并提供多种访问方式，包括本地 CLI、HTTP 接口以及通过 OpenAI 客户端的集成。这篇文章将详细介绍 Ollama 的功能，如何使用 Ollama 拉取模型、运行模型，并通过多种方式访问推理服务。</p>
+<!-- more -->
+<h2 id="一-ollama的主要功能">一、Ollama的主要功能</h2>
+<p>Ollama 的核心功能包括：</p>
+<ol>
+<li><strong>本地模型管理</strong>：Ollama 支持从官方模型库或自定义模型库拉取预训练模型，并在本地保存和加载。它支持各种流行的模型格式（如 ONNX、PyTorch、TensorFlow）。</li>
+<li><strong>高效推理</strong>：通过 GPU/CPU 的加速，Ollama 提供高效的模型推理，适合本地化应用或需要控制数据隐私的场景。</li>
+<li><strong>多种接口访问</strong>：Ollama 支持命令行（CLI）、HTTP 接口访问推理服务，并通过 OpenAI 客户端实现更广泛的集成。</li>
+<li><strong>环境变量配置</strong>：通过灵活的环境变量，用户可以自定义推理设备（GPU/CPU）、缓存路径、并发数、日志级别等。</li>
+</ol>
+<p>接下来我们将详细介绍 Ollama 的安装、常用命令、如何拉取和运行模型、以及不同方式访问 Ollama 推理服务。</p>
+<h2 id="二-ollama的安装与基本配置">二、Ollama的安装与基本配置</h2>
+<h3 id="1-安装-ollama">1. 安装 Ollama</h3>
+<h4 id="11-获取桌面软件">1.1 获取桌面软件</h4>
+<p>安装桌面软件可以去官网下载：<a href="https://ollama.com/download">ollama</a></p>
+<h4 id="12-命令行安装">1.2 命令行安装</h4>
+<p>要安装 Ollama，首先需要在系统中安装 Ollama CLI 工具。可以通过以下命令安装：</p>
+<pre><code class="language-bash"># macOS 用户
+brew install ollama
+
+# Linux 用户（以 Ubuntu 为例）
+curl -s https://ollama.com/install | bash
+
+# Windows 用户可以通过 WSL2 安装，参考官网文档获取更多细节
+</code></pre>
+<h4 id="13-docker镜像">1.3 docker镜像</h4>
+<p>去下载官方镜像<a href="https://hub.docker.com/r/ollama/ollama">Ollama Docker image</a>。一般高端计算显卡都放在远程，推荐使用docker容器化安装。本文的后续操作也是基于容器化安装。<br>
+启动命令按照docker正常启动就行，可以参考我的启动命令，自行修改</p>
+<pre><code class="language-bash">docker run -d --gpus=all \
+ -e OLLAMA_KEEP_ALIVE=-1 \
+ -e OLLAMA_NUM_PARALLEL=4  \
+ -e OLLAMA_FLASH_ATTENTION=1  \
+ -v /data3/alex/ollama:/root/.ollama  \
+ -p 23153:11434 --name ollama-vincent docker.io/ollama/ollama:0.3.11
+</code></pre>
+<h3 id="2-配置-ollama">2. 配置 Ollama</h3>
+<p>Ollama 允许通过环境变量进行配置。常见的环境变量包括：</p>
+<ul>
+<li><strong>OLLAMA_MODEL_PATH</strong>：指定模型存储路径</li>
+<li><strong>OLLAMA_DEVICE</strong>：选择推理使用的设备（如 <code>cpu</code> 或 <code>gpu</code>）</li>
+<li><strong>OLLAMA_LOG_LEVEL</strong>：设置日志级别（如 <code>debug</code>, <code>info</code>）</li>
+</ul>
+<p>例如：</p>
+<pre><code class="language-bash">export OLLAMA_MODEL_PATH=~/ollama_models
+export OLLAMA_DEVICE=gpu
+export OLLAMA_LOG_LEVEL=debug
+</code></pre>
+<p>更多环境变量可以参考命令的输出：</p>
+<pre><code class="language-bash">root@6b5c84c53d0e:/# ollama serve -h
+Start ollama
+
+Usage:
+  ollama serve [flags]
+
+Aliases:
+  serve, start
+
+Flags:
+  -h, --help   help for serve
+
+Environment Variables:
+      OLLAMA_DEBUG               Show additional debug information (e.g. OLLAMA_DEBUG=1)
+      OLLAMA_HOST                IP Address for the ollama server (default 127.0.0.1:11434)
+      OLLAMA_KEEP_ALIVE          The duration that models stay loaded in memory (default &quot;5m&quot;)
+      OLLAMA_MAX_LOADED_MODELS   Maximum number of loaded models per GPU
+      OLLAMA_MAX_QUEUE           Maximum number of queued requests
+      OLLAMA_MODELS              The path to the models directory
+      OLLAMA_NUM_PARALLEL        Maximum number of parallel requests
+      OLLAMA_NOPRUNE             Do not prune model blobs on startup
+      OLLAMA_ORIGINS             A comma separated list of allowed origins
+      OLLAMA_SCHED_SPREAD        Always schedule model across all GPUs
+      OLLAMA_TMPDIR              Location for temporary files
+      OLLAMA_FLASH_ATTENTION     Enabled flash attention
+      OLLAMA_LLM_LIBRARY         Set LLM library to bypass autodetection
+      OLLAMA_GPU_OVERHEAD        Reserve a portion of VRAM per GPU (bytes)
+      OLLAMA_LOAD_TIMEOUT        How long to allow model loads to stall before giving up (default &quot;5m&quot;)
+</code></pre>
+<h2 id="三-常用的-ollama-命令">三、常用的 Ollama 命令</h2>
+<p>Ollama 提供了多种命令，方便用户进行模型管理和推理。下面介绍一些常用的命令。</p>
+<h3 id="1-查看帮助信息">1. 查看帮助信息</h3>
+<p>要查看 Ollama 支持的所有命令及其用法，可以使用以下命令：</p>
+<pre><code class="language-bash">ollama help
+</code></pre>
+<p>这将列出所有支持的命令和相关说明，例如 <code>run</code>、<code>list</code>、<code>pull</code> 等。</p>
+<h3 id="2-查看可用模型">2. 查看可用模型</h3>
+<p>要查看 Ollama 官方支持的模型，可以运行以下命令：</p>
+<pre><code class="language-bash">ollama list
+</code></pre>
+<p>这将返回一个可用模型的列表，包括模型的名称、版本等信息。</p>
+<h3 id="3-拉取模型">3. 拉取模型</h3>
+<p>要拉取某个模型到本地进行推理，使用 <code>pull</code> 命令。例如，拉取一个名为 <code>llama2</code> 的模型：</p>
+<pre><code class="language-bash">ollama pull llama2
+</code></pre>
+<p>该命令会将模型下载并存储在本地的 <code>OLLAMA_MODEL_PATH</code> 路径中。如果没有指定该路径，Ollama 会使用默认存储路径。</p>
+<h3 id="4-删除模型">4. 删除模型</h3>
+<p>如果不再需要某个模型，可以使用 <code>remove</code> 命令将其从本地删除：</p>
+<pre><code class="language-bash">ollama remove llama2
+</code></pre>
+<h3 id="5-检查模型状态">5. 检查模型状态</h3>
+<p>使用 <code>ps</code> 命令可以查看当前模型的状态，包括是否已加载到内存中，设备信息等：</p>
+<pre><code class="language-bash">root@6b5c84c53d0e:/# ollama ps
+NAME                         ID              SIZE      PROCESSOR    UNTIL
+qwen2:7b-instruct            e0d4e1163c58    5.7 GB    100% GPU     Forever
+qwen2.5:1.5b                 65ec06548149    2.0 GB    100% GPU     Forever
+qwen2.5:0.5b                 a8b0c5157701    1.3 GB    100% GPU     Forever
+llama3.2:3b-instruct-fp16    195a8c01d91e    8.5 GB    100% GPU     Forever
+glm4:9b                      5b699761eca5    6.6 GB    100% GPU     Forever
+</code></pre>
+<h2 id="四-运行模型">四、运行模型</h2>
+<p>模型拉取完成后，Ollama 提供了简便的方式来运行推理任务。以下介绍如何通过命令行、HTTP 接口和 OpenAI 客户端访问推理服务。</p>
+<h3 id="1-通过命令行运行模型">1. 通过命令行运行模型</h3>
+<p>要在命令行中运行模型进行推理，可以使用 <code>run</code> 命令。例如，运行 <code>llama2</code> 模型并输入一句话让其进行推理：</p>
+<pre><code class="language-bash">ollama run llama2 &quot;Hello, how are you today?&quot;
+</code></pre>
+<p>输出将显示模型生成的结果。<code>run</code> 命令支持传递不同的参数，例如设置生成的最大长度、温度等参数：</p>
+<pre><code class="language-bash">ollama run llama2 &quot;Hello!&quot; --max_length 50 --temperature 0.8
+</code></pre>
+<p>最好是直接进入本地交互环境</p>
+<pre><code class="language-bash">root@6b5c84c53d0e:/# ollama run qwen2:7b-instruct
+&gt;&gt;&gt; 你能做什么，你是什么模型
+我是一个大型语言模型，被训练来生成与各种主题相关的文本内容。我可以帮助解答问题、提供信息、进行对话、撰写文章、故事或邮件等。尽管我的
+能力在不断扩展和优化中，但我并不能执行需要实际物体操作或者具有特定领域专业知识的任务。
+
+我是通义千问大模型的增强版本，名为通义万相，主要用于处理语言生成任务，并以图像形式输出结果。通过将自然语言指令转化为图像，我可以帮助
+用户获得创意设计、插画、图像修改以及其他基于视觉的需求。我的核心功能是理解文本输入并将其转换为与之相关的高质量图像输出。
+
+请注意，在某些情况下我可能会犯错误或者给出不准确的回答，请您根据实际情况进行判断和验证信息的正确性。我会不断地学习和进步，希望在帮助
+用户解决问题和提供有价值的信息方面发挥积极作用。
+&gt;&gt;&gt; 
+</code></pre>
+<h3 id="2-通过-http-访问">2. 通过 HTTP 访问</h3>
+<p>Ollama 还提供了 HTTP 接口，允许用户通过 REST API 调用模型进行推理。</p>
+<h4 id="启动-http-服务">启动 HTTP 服务</h4>
+<p>首先，需要启动 Ollama 的 HTTP 服务，可以通过以下命令启动服务：</p>
+<pre><code class="language-bash">ollama serve
+</code></pre>
+<p>这将启动一个本地 HTTP 服务器，默认情况下监听 <code>localhost:11434</code>。你可以通过浏览器或 Postman 访问 API 进行测试。<br>
+如果使用上面的容器化安装，启动容器以后，服务已经启动了，使用ollama ps 命令就能看到已经running的模型服务。</p>
+<h4 id="发起-http-请求">发起 HTTP 请求</h4>
+<p>使用 <code>curl</code> 命令发起 HTTP 请求，调用 <code>llama2</code> 模型进行推理：</p>
+<pre><code class="language-bash">curl -X POST http://localhost:11434/v1/models/llama2/completions \
+-H &quot;Content-Type: application/json&quot; \
+-d '{
+  &quot;prompt&quot;: &quot;Tell me a joke&quot;,
+  &quot;max_length&quot;: 50,
+  &quot;temperature&quot;: 0.7
+}'
+</code></pre>
+<p>该请求将返回模型生成的文本。响应格式为 JSON，例如：</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;cmpl-5sWYxF&quot;,
+  &quot;object&quot;: &quot;text_completion&quot;,
+  &quot;created&quot;: 1690243381,
+  &quot;model&quot;: &quot;llama2&quot;,
+  &quot;choices&quot;: [
+    {
+      &quot;text&quot;: &quot;Why don't scientists trust atoms? Because they make up everything!&quot;
+    }
+  ]
+}
+</code></pre>
+<p>也支持chat调用接口</p>
+<pre><code class="language-json">curl --location 'http://localhost:11434/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--data '{
+    &quot;model&quot;: &quot;qwen2:7b-instruct&quot;,
+    &quot;stream&quot;: false,
+    &quot;messages&quot;: [
+        {
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: &quot;你是谁，可以做什么？&quot;
+        }
+    ],
+    &quot;temperature&quot;: 0
+}'
+</code></pre>
+<pre><code class="language-json">{
+    &quot;id&quot;: &quot;chatcmpl-568&quot;,
+    &quot;object&quot;: &quot;chat.completion&quot;,
+    &quot;created&quot;: 1727494268,
+    &quot;model&quot;: &quot;qwen2:7b-instruct&quot;,
+    &quot;system_fingerprint&quot;: &quot;fp_ollama&quot;,
+    &quot;choices&quot;: [
+        {
+            &quot;index&quot;: 0,
+            &quot;message&quot;: {
+                &quot;role&quot;: &quot;assistant&quot;,
+                &quot;content&quot;: &quot;我是阿里云开发的一款超大规模语言模型，我叫通义千问。我可以生成各种文本内容、回答问题、提供信息咨询等任务。你可以问我各种问题或者需要创作一些文本，我会尽力帮助你。如果你有任何需求，请随时告诉我！&quot;
+            },
+            &quot;finish_reason&quot;: &quot;stop&quot;
+        }
+    ],
+    &quot;usage&quot;: {
+        &quot;prompt_tokens&quot;: 14,
+        &quot;completion_tokens&quot;: 55,
+        &quot;total_tokens&quot;: 69
+    }
+}
+</code></pre>
+<h3 id="3-通过-openai-客户端访问">3. 通过 OpenAI 客户端访问</h3>
+<p>Ollama 支持通过 OpenAI 的 API 客户端访问本地的模型推理服务，这样你可以使用类似调用 OpenAI API 的方式来调用本地的 Ollama 模型。</p>
+<h4 id="配置-openai-客户端">配置 OpenAI 客户端</h4>
+<p>首先，需要将 OpenAI 客户端的 API 请求重定向到本地 Ollama 服务。你可以使用以下命令指定 Ollama 服务的 API 密钥和本地 API 端点：</p>
+<pre><code class="language-bash">export OPENAI_API_KEY=ollama-api-key
+export OPENAI_API_BASE_URL=http://localhost:11434/v1
+</code></pre>
+<p>此时，任何通过 OpenAI 客户端发起的请求将会转发给 Ollama 的本地服务。</p>
+<h4 id="通过-openai-客户端发起请求">通过 OpenAI 客户端发起请求</h4>
+<p>使用 OpenAI Python SDK 或其他 OpenAI 客户端库调用 Ollama 模型进行推理。例如，使用 Python 调用 <code>llama2</code> 模型：</p>
+<pre><code class="language-python">import openai
+
+openai.api_key = 'ollama-api-key'
+openai.api_base = 'http://localhost:11434/v1'
+
+response = openai.Completion.create(
+  model=&quot;llama2&quot;,
+  prompt=&quot;What is the capital of France?&quot;,
+  max_tokens=50
+)
+
+print(response.choices[0].text.strip())
+</code></pre>
+<p>该代码将通过本地的 Ollama 服务运行 <code>llama2</code> 模型，并返回结果。</p>
+<h2 id="五-ollama的并发与性能优化">五、Ollama的并发与性能优化</h2>
+<p>Ollama 支持通过设置环境变量来优化并发处理和性能。常用的性能优化配置包括：</p>
+<ul>
+<li>
+<p><strong>并发限制</strong>：通过 <code>OLLAMA_CONCURRENCY</code> 设置最大并发请求数。例如：</p>
+<pre><code class="language-bash">export OLLAMA_CONCURRENCY=4
+</code></pre>
+</li>
+<li>
+<p><strong>批处理大小</strong>：通过 <code>OLLAMA_MAX_BATCH_SIZE</code> 设置批处理推理的最大大小，优化推理吞吐量。例如：</p>
+<pre><code class="language-bash">export OLLAMA_MAX_BATCH_SIZE=16
+</code></pre>
+</li>
+<li>
+<p><strong>缓存管理</strong>：通过 <code>OLLAMA_CACHE_PATH</code> 设置缓存路径，加速重复推理请求的处理。</p>
+</li>
+</ul>
+<h2 id="六-日志与调试">六、日志与调试</h2>
+<p>Ollama 提供详细的日志功能，帮助开发者进行调试和性能监控。通过 <code>OLLAMA_LOG_LEVEL</code> 环境变量，用户可以控制日志的详细程度，例如：</p>
+<pre><code class="language-bash">export OLLAMA_LOG_LEVEL=debug
+</code></pre>
+<p>日志文件可以通过 <code>OLLAMA_LOG_FILE</code> 指定路径进行存储。例如：</p>
+<pre><code class="language-bash">export OLLAMA_LOG_FILE=~/ollama_logs/debug.log
+</code></pre>
+<p>日志级别包括 <code>debug</code>、<code>info</code>、<code>warn</code> 和 <code>error</code>。设置为 <code>debug</code> 级别时，系统会记录详细的调试信息，帮助开发者排查问题。</p>
+<h2 id="七-总结">七、总结</h2>
+<p>Ollama 是一个强大的本地大模型推理平台，支持用户通过命令行、HTTP API 和 OpenAI 客户端进行多样化的模型调用。通过合理配置环境变量和优化推理流程，Ollama 能够为用户提供高效的本地化推理解决方案。</p>
+<p>无论是在隐私敏感的本地化环境中，还是需要高性能的大规模推理任务，Ollama 都是一个理想的选择。</p>
+<p>希望本文为你提供了清晰的 Ollama 基础使用指南，从模型拉取、推理，到多种访问方式，你现在可以轻松开始使用 Ollama 进行本地化模型推理了！</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[君君上幼儿园]]></title>
+        <id>https://cjblog.github.io/post/jun-jun-shang-you-er-yuan/</id>
+        <link href="https://cjblog.github.io/post/jun-jun-shang-you-er-yuan/">
+        </link>
+        <updated>2024-09-26T01:39:15.000Z</updated>
+        <summary type="html"><![CDATA[<p>君君今年满 4 岁了，下半年开始上幼儿园。上学第一天，我和妈妈还有妹妹一起送君君去学校。小孩子刚开始离开爸妈亲人，头几天都会很不习惯，不想幼儿园，甚至临别哭闹，这些我们都有预料。然而君君却没有哭闹，送他进到学校门以后，老师带着去教室，君君仅仅皱了一会眉头，没有看我就去了教室。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>君君今年满 4 岁了，下半年开始上幼儿园。上学第一天，我和妈妈还有妹妹一起送君君去学校。小孩子刚开始离开爸妈亲人，头几天都会很不习惯，不想幼儿园，甚至临别哭闹，这些我们都有预料。然而君君却没有哭闹，送他进到学校门以后，老师带着去教室，君君仅仅皱了一会眉头，没有看我就去了教室。</p>
+<!-- more -->
+<p>第一次上学就是这么普通平常，仿佛他是个上过学的小朋友，径直走进教室。此时我也急忙去了地铁站。在地铁上，我突然想到君君刚出生那会，眼睛还没睁开的婴儿，到现在自己可以跑着去上幼儿园了。四年时间过得真快，这种快是对时间的流逝几乎无感，想不起来几件印象深刻的事情。也许我们对于时间的感知于记忆有关吧。</p>
+<p>君君回到家，我们先后都问他在学校怎么样，他回答都是好玩，明天还要去学校。我们终于放心了，小孩子适应得不错。我想来这一切很可能与老婆之前买了育儿课程有关，是那种半托班，每周去上几次课，每次一个小时左右，后面是接送他去。现在想着他已经提前适应过自己一个人在学校，自己找小朋友玩。</p>
+<p>差点忘了，小孩在上学前，也做了不少心理建设。老婆买过幼儿园的绘本，是介绍幼儿园的生活，君君反复看过很多次，早就清楚我们把他送过去以后，他应该做什么，如何吃饭，午休，玩耍，这次适应的很快。在幼儿园群里，老师发小朋友一起玩的视频，看着君君边笑边跑一起做游戏。小孩子真的是发自内心的开心。</p>
+<p>2024年9月19日</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[珠海一日游]]></title>
+        <id>https://cjblog.github.io/post/zhu-hai-yi-ri-you/</id>
+        <link href="https://cjblog.github.io/post/zhu-hai-yi-ri-you/">
+        </link>
+        <updated>2024-09-26T01:33:37.000Z</updated>
+        <summary type="html"><![CDATA[<p>实际上是两天一晚，早上早点出发，第二晚晚点回来，留足够的时间玩。</p>
+<h2 id="总结攻略">总结攻略</h2>
+<ul>
+<li>住酒店：唐家湾 亚朵酒店，有自助早餐。酒店有早餐可以省下不少时间。岳母和老婆都很喜欢酒店的服务和自助餐。</li>
+<li>第一天：
+<ul>
+<li>早上8点多从出发，10点左右到珠海的日月贝拍照，玩两个小时</li>
+<li>和记私房菜。午餐过后去酒店办入住</li>
+<li>下午4点多出门，去海滨浴场，一直玩到晚上</li>
+</ul>
+</li>
+<li>第二天：
+<ul>
+<li>9点下楼，酒店自助早餐，很丰盛。</li>
+<li>买了游泳圈直奔海滨浴场</li>
+<li>午餐自带，一直玩到下午4点左右</li>
+<li>5点回到酒店洗澡，点了一家长沙菜外卖。下午6点退房。</li>
+<li>吃完饭7点半不到，开车回家。晚上9点半到家。</li>
+</ul>
+</li>
+</ul>
+]]></summary>
+        <content type="html"><![CDATA[<p>实际上是两天一晚，早上早点出发，第二晚晚点回来，留足够的时间玩。</p>
+<h2 id="总结攻略">总结攻略</h2>
+<ul>
+<li>住酒店：唐家湾 亚朵酒店，有自助早餐。酒店有早餐可以省下不少时间。岳母和老婆都很喜欢酒店的服务和自助餐。</li>
+<li>第一天：
+<ul>
+<li>早上8点多从出发，10点左右到珠海的日月贝拍照，玩两个小时</li>
+<li>和记私房菜。午餐过后去酒店办入住</li>
+<li>下午4点多出门，去海滨浴场，一直玩到晚上</li>
+</ul>
+</li>
+<li>第二天：
+<ul>
+<li>9点下楼，酒店自助早餐，很丰盛。</li>
+<li>买了游泳圈直奔海滨浴场</li>
+<li>午餐自带，一直玩到下午4点左右</li>
+<li>5点回到酒店洗澡，点了一家长沙菜外卖。下午6点退房。</li>
+<li>吃完饭7点半不到，开车回家。晚上9点半到家。</li>
+</ul>
+</li>
+</ul>
+<!-- more -->
+<h2 id="游记">游记</h2>
+<p>今年8月份去珠海出差了半个月时间，算是提前摸清楚了香洲区附近吃和玩的地方，这次趁着中秋节放假，带着一家人自驾过去玩。</p>
+<p>从深圳松岗出发，目的地是珠海香洲区唐家湾镇。导航时间是一个半小时。我们是9月15日早上8点半出发，一路上很顺畅。晴空万里，尤其是在深中大桥，海比天的颜色还蓝。没堵车的体验太好了。</p>
+<p>过桥下高速，到中山，一路往南走，大约半小时就到了唐家湾镇的酒店，上午10点左右跟预计时间一样，我们直接去海滨公园，带着娃去游泳。娃最爱两样的东西，沙子和水，所以说海滩是最佳的带娃场所。</p>
+<figure data-type="image" tabindex="1"><img src="https://cjblog.github.io/post-images/1727314646644.JPG" alt="" loading="lazy"></figure>
+<p>开始走到沙滩上，娃第一眼看到的是沙子，立马拿出各种小汽车在沙子上玩，划出轨道，然后沿着轨道一直来回“开车”。君君玩车和沙子可以坐着玩，累了趴在地上玩，专注玩两个小时都不动的。妹妹则是到处跑，拿上铲子，提着桶到处挖沙，装水，一会又换着地方玩。</p>
+<figure data-type="image" tabindex="2"><img src="https://cjblog.github.io/post-images/1727314629764.JPG" alt="" loading="lazy"></figure>
+<p>终于玩到海滩边上了，看到别人在戏水，两个娃立马往水里扑，脱缰野马般冲进水里。衣服嘛肯定是湿透了，每次出门每个娃至少带四至五套换的衣服。看着两个娃在水里翻滚，站起来又扑进水里。哥哥大一点，知道每次扑进水里把游泳圈抬起来，妹妹的游泳圈还在屁股位置，一扑进水里倒插葱，头在水里，身子被游泳圈浮起来，脚使不上力，老婆健步上去拉起来。看着很危险，实际一点也不安全，我在原地哈哈哈大笑，走过去扶起妹妹，告诉她把游泳圈拉起来再跳进水里。虽然只有两岁的宝宝，但她能听懂我说的。</p>
+<figure data-type="image" tabindex="3"><img src="https://cjblog.github.io/post-images/1727314665976.JPG" alt="" loading="lazy"></figure>
+<p>我跟老婆说，“现在是饼兑现的时候了”。以前怀孕时候情绪不太好，假期基本没有出去玩过，这几年相继老大老二出生养育，娃太小出门也没法玩。现在老大4岁，老二2岁了，基本上可以自驾在周边市玩了，也是兑现几年前跟老婆的承诺。老婆满意的笑到，“这还差不多，饼算是真真吃到了”。</p>
+<p>2024年9月18日</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[公司开了大模型发布会]]></title>
+        <id>https://cjblog.github.io/post/gong-si-kai-liao-da-mo-xing-fa-bu-hui/</id>
+        <link href="https://cjblog.github.io/post/gong-si-kai-liao-da-mo-xing-fa-bu-hui/">
+        </link>
+        <updated>2024-09-07T03:17:21.000Z</updated>
+        <summary type="html"><![CDATA[<p>最近公司开了一场多模态的大模型发布会。声称可以实现文生文、文生图、文生视频的能力，并且还演示了多模态的生成能力。出席发布会的包括某市的市委书记、市长等主要领导。整个发布会下来，看起来都很顺利，会议结束办了一个小的座谈会。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>最近公司开了一场多模态的大模型发布会。声称可以实现文生文、文生图、文生视频的能力，并且还演示了多模态的生成能力。出席发布会的包括某市的市委书记、市长等主要领导。整个发布会下来，看起来都很顺利，会议结束办了一个小的座谈会。</p>
+<!-- more -->
+<p>作为开发人员，我知道基本没有投入算力成本。也就是说号称自研的，拥有xxx能力的模型，其实调用第三方接口的。我们唯一的做的事情就是根据场景，调试一些提示词，于是就这样完成了一场大型发布会，整个研发周期不足一个月的发布会。</p>
+<p>想来这种事情已经不足为奇了，差不多是行业的潜规则了。试想一下，国内头部的大企业他们又有多少资源养活研发团队呢，做到真正的研发创新呢？如果不用国外开源的基模型，国内的研发水平又是怎么样呢？当然我不是说不能用，毕竟一个好东西又能够节省企业成本，不用才是傻子，有什么比搞钱重要呢。</p>
+<p>这个矛盾点在于，研发能力会一直落后。看似在追赶，实际上会越差越远，看似学会了“渔”，实际上在坐等吃“鱼”。当然这种现状不是某几个人能够改变的。我也并不是抱怨这种大环境，毕竟抱怨是没有任何意义的事情的，除了发泄情绪别无他用。</p>
+<p>那么应该如何做呢？与其思考如何破局，不如看看别人的行动。那就是“润”，个体无法改变现状只要改变自己，换个生存环境。我上面说的公司的发布会例子只是很小的一个因素，无非是特殊历史阶段的事情，由野蛮生长走向正规化需要时间，而真正让我吐槽的点，在于从小到大的应试教育，培养了大量服从性品质，让普遍的人只有极低反抗意识，极高的顺从、适应环境能力。</p>
+<p>公司一场发布会让我感慨颇多，我不理解的事情太多了。政府公布的全国每周平均上班时间屡创新高48小时多，可想而知民营企业的现状是什么样子。我们知道这样违法了，他们也知道，他们也知道我们知道违法了。那又能如何呢？我们的子孙后代该如何呢？</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[一场有意思的一日游]]></title>
+        <id>https://cjblog.github.io/post/yi-chang-you-yi-si-de-yi-ri-you/</id>
+        <link href="https://cjblog.github.io/post/yi-chang-you-yi-si-de-yi-ri-you/">
+        </link>
+        <updated>2024-05-03T02:22:39.000Z</updated>
+        <summary type="html"><![CDATA[<p>原计划4月30日一家人出发，去河源度过五一假期，没想到出了突发事情，我们只能当天往返，凑成了这一日游。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>原计划4月30日一家人出发，去河源度过五一假期，没想到出了突发事情，我们只能当天往返，凑成了这一日游。</p>
+<!-- more -->
+<p>4月30日下班以后，当晚出深圳肯定会堵车，计划当晚10点多以后出发，趁着小孩熟睡中，加上堵车应该不会那么严重，算是最佳时间吧。事实是堵车比预想的严重多了，170公里的路，5个多小时，路上密密麻麻的“红色线段”，于是约定第二天早餐后出发。</p>
+<p>5月1日起来，吃完早餐收拾好孩子们的衣物和玩具。打开地图已经开始堵车了，也需要4个多小时，想着白天开车，堵车就堵车吧。8点打开地图还是一路顺畅了，看来大家的想法一致哈。</p>
+<p>妻子每次出门都会准备水果和零食，主要是自己吃，也给孩子路上吃点，不至于一路无事可做而打闹。放上音乐开开心心地出门了。开进东莞，惠州山里，刚下过雨，山里云烟缭绕，宛如仙境，湿润的空气，沁人心脾，这让平日里积累的疲倦感，瞬间得到释放。两个打工牛马，莞尔一笑。长期待在工作的地方，哪怕是到了休息日，仍然感觉不到休息。旅游嘛，就是从自己待腻的地方，去到别人待腻的地方，这句话诠释很到位。</p>
+<p>妻子先开了一段堵车的路，说“我都没时间吃零食”，“你看我对你好吧，路上帮你开了最堵车的一段”。刚放假的第一天，我似乎没从工作的疲惫中缓过来，坐在副驾看看风景，那真是一件美事。中午吃过午饭，两个娃骑车活动了一会。还剩下一半多的路程，吃过饭以后，下午3点-5点这两个小时，那是真困啊，妻子刚睡下一会，两个娃就开始开心打闹了，“你说长途自驾，看看两个娃，你还敢不敢”。</p>
+<p>下午5点多到家了，又商场买点东西，7点多回到家里。窗户打开透透气，还得是河源的空气好，凉风习习，瘫倒在沙发上不想动了。最美的事情莫过于疲惫的时候躺在沙发上，吹着自然凉风、吃着西瓜、啃着广式烧鸭。说起烧鸭，两个娃更是狼吞虎咽，半只鸭我还没吃上几块。小妹子吃完肉，骨头都吮吸得津津有味。就在做完这一切，下楼带娃骑车，妻子老家传来噩耗，无论如何，今晚我们都必须回到深圳了。刚准备好的床铺衣物，立马收拾好，从深圳拿东西，准备第二天回老家。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[kafka消费的重平衡策略]]></title>
+        <id>https://cjblog.github.io/post/kafka-xiao-fei-de-chong-ping-heng-ce-lue/</id>
+        <link href="https://cjblog.github.io/post/kafka-xiao-fei-de-chong-ping-heng-ce-lue/">
+        </link>
+        <updated>2024-04-27T13:45:45.000Z</updated>
+        <summary type="html"><![CDATA[<p>算法推理服务的日处理能力当前已经达到千万级别，我们的算法系统采用Kafka流式消费。系统经常面临的一个重要问题就是消息积压，这时候就需要增加推理算力。如何动态的增减推理实例数，以保障消息不丢失，同时也不需要修改服务代码。本文做了一个小实验，验证多个消费者同时消费同一个topic，消息是否会丢失，或者存在重复消费的情况。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>算法推理服务的日处理能力当前已经达到千万级别，我们的算法系统采用Kafka流式消费。系统经常面临的一个重要问题就是消息积压，这时候就需要增加推理算力。如何动态的增减推理实例数，以保障消息不丢失，同时也不需要修改服务代码。本文做了一个小实验，验证多个消费者同时消费同一个topic，消息是否会丢失，或者存在重复消费的情况。</p>
+<!-- more -->
+<p>创建消费的topic 3个分区，意味着同一个消费者组最多3个消费者可以消费。消费者分别用3个消费脚本，每个消费者单进程消费。消费者不绑定分区，消费者实例采用默认的参数。具体参数可以参考<a href="https://kafka-python.readthedocs.io/en/master/apidoc/KafkaConsumer.html">kafka-python</a>。</p>
+<p>统计了消费结果如下：<br>
+<img src="https://cjblog.github.io/post-images/1714229434713.png" alt="" loading="lazy"></p>
+<p>上表中为offset结果，可以看到存在部分重复消费的情况，这是因为终端机消费者进程时，还未提交到集群，以至于偏移量offset没有更新。由于配置参数Kafka消费者每次最多poll10条数据，可以看到重复消费的情况并不严重。</p>
+<p>topic中放了999条record被全部消费，说明随机终止和重启消费者进程，并不会丢失record，说明Kafka集群的重平衡机制是可以信任的。其实Kafka的重平衡机制是由消费者参数`api_version``来指定的。</p>
+<blockquote>
+<p>api_version (tuple) –<br>
+Specify which Kafka API version to use. If set to None, the client will attempt to infer the broker version by probing various APIs. Different versions enable different functionality.<br>
+Examples<br>
+(0, 9)** enables full group coordination features with automatic<br>
+partition assignment and rebalancing**</p>
+</blockquote>
+<h2 id="结论">结论</h2>
+<p>通过实验随机中断和重复消费者，不影响Kafka的消费，同一个消费者组的消费者数变化，会触发集群的重平衡机制。重新分配消费者对应分区。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[深圳暴雨]]></title>
+        <id>https://cjblog.github.io/post/shen-zhen-bao-yu/</id>
+        <link href="https://cjblog.github.io/post/shen-zhen-bao-yu/">
+        </link>
+        <updated>2024-04-21T06:48:27.000Z</updated>
+        <summary type="html"><![CDATA[<p>最近几天深圳开始了暴雨模式，还记得2015年我刚来深圳上班，碰到雨季，周末外面下着大雨，我一个人在出租屋里，捧着一本书看。感受深圳绵绵不断的雨，当时写了一篇短文，《喜欢这个城市，喜欢下雨》。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>最近几天深圳开始了暴雨模式，还记得2015年我刚来深圳上班，碰到雨季，周末外面下着大雨，我一个人在出租屋里，捧着一本书看。感受深圳绵绵不断的雨，当时写了一篇短文，《喜欢这个城市，喜欢下雨》。</p>
+<!-- more -->
+<p>刚毕业，初来乍到，喜欢大城市，喜欢灯红酒绿人来人往，看着高楼大厦，仿佛自己也是大城市的人，看着标语说“来了就是深圳人，来了就做无常献血志愿者”，于是我鼓起勇气在深圳书城献过两次血。</p>
+<p>望着外面下起的大雨，距离上次感受深圳的大雨，差不多十年了。思考过来的十年，换过几份工作，摸爬滚打，没有明确的目标和规划，不知道自己想做什么，能做什么。深圳人只有两种状态，上班和路上。就这样横冲直撞，头破血流，就像一个拳击手打比赛，打了十年，四下张望，没有看到对手，一拳拳打在空气中，你越是使劲就越疲惫。</p>
+<p>最近这两年来，我不再使劲了，似乎是现在所说的“躺平”。要是说躺平的话，我是不甘心的。在这样内卷的城市躺平，还不如回到十八线城市去。既然没有下定决心回去，那么留在这里还得努力“卷”，处于中间状态是最幸苦的，精神内耗。</p>
+<p>外面烟雾弥漫，雨如鸡蛋大小，砸在窗户上。算不算是暴力美学呢，两个娃蹦蹦跳跳，打断了思绪，就到这里吧。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[安卓手机挺好用]]></title>
+        <id>https://cjblog.github.io/post/an-zhuo-shou-ji-ting-hao-yong/</id>
+        <link href="https://cjblog.github.io/post/an-zhuo-shou-ji-ting-hao-yong/">
+        </link>
+        <updated>2024-03-24T15:13:25.000Z</updated>
+        <summary type="html"><![CDATA[<p>说起手机，对我来说简单有一个阶段。我上高中才开始用手机，那会是二爷爷给我一个小灵通（主要用于本市通话的），非常迷你的直板机。高中那会我基本上都放在宿舍，有时需要给家里打电话的时候会拿出来用。看着大多同学每天拿着发短信，看文字版的NBA，当然用得最多的还是看小说。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>说起手机，对我来说简单有一个阶段。我上高中才开始用手机，那会是二爷爷给我一个小灵通（主要用于本市通话的），非常迷你的直板机。高中那会我基本上都放在宿舍，有时需要给家里打电话的时候会拿出来用。看着大多同学每天拿着发短信，看文字版的NBA，当然用得最多的还是看小说。</p>
+<!-- more -->
+<p>上大学以后也是直板机，四五百块钱的手机，放音乐声音很刺耳，充满破音的那种。不过大学那会开始有翻盖手机了，我没有用过翻盖的。第一次看见别人用全面屏智能手机，开始大学的舍友，省会城市的有钱人确实不一样，听他说是洛基亚的，几千块呢。</p>
+<p>大学还没毕业时，智能手机已经非常火爆了，印象中是苹果4和4s的发布。安卓手机大爆发，那个时候的苹果手机与安卓手机真是天差地别。我有幸在大学用上了苹果4，别人看我的眼神都不一样。说实话，我对这些电子产品没有太大的感觉。之后才知道，发布那会国内很难买到，我用的这个是港版的，当时完全不知道。</p>
+<p>毕业以后我自己买的第一款手机是华为荣耀note7，6.7英寸的大屏。那时候大屏幕还没那么流行，经常被问起这么大的屏幕放口袋都不方便吧，现在普遍都这么大，自然没人问了。我那时候出差比较多，经常需要看文档，火车上还有看看电影，当然需要一个屏幕还不错的大屏手机。那是2016-2017年，印象中华为还没有用爱国作为营销手段。使用下来体验不错，那时候对于硬件参数也不是特别清楚。</p>
+<p>之后就没有用过安卓手机了。荣耀note7用了两年多时间，果不其然出现各种系统bug，使用卡顿问题，像是提前说好的一样，安卓手机的保鲜只有两年。屏幕色彩差，卡顿，安全性差，广告多，这些一直是安卓机的标签。其实这些锅还真不能让安卓系统来背，毕竟使用技术是人，技术本身有什么过错呢。</p>
+<p>最近使用了红米的k60，算是小米低端系列中的高端。这个手机已经1年多了，使用还真流畅，屏幕也非常赞，拍照色彩和曝光真让我刮目相看了。给我印象最深一点是NFC的开放性好。小区的门禁和公司门禁卡，我可以直接复制到手机钥匙中，车卡也能很方便添加。这是苹果手机大概率不会放开的，这些功能确实非常方便。至少每天上班我就能少拿两张门禁卡。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[学校周末要补课]]></title>
+        <id>https://cjblog.github.io/post/xue-xiao-zhou-mo-yao-bu-ke/</id>
+        <link href="https://cjblog.github.io/post/xue-xiao-zhou-mo-yao-bu-ke/">
+        </link>
+        <updated>2024-03-21T15:12:33.000Z</updated>
+        <summary type="html"><![CDATA[<p>晚上我下班回来没发现什么异常，老婆陪着孩子们玩得很开心。晚上睡觉前，老婆一直在刷短视频，我催她睡觉，明天还要早起上班呢。<br>
+“别动我，心情不好，以后周天要轮流上课了”<br>
+“本来时间就少，现在周天还要补课，真是无语了”</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>晚上我下班回来没发现什么异常，老婆陪着孩子们玩得很开心。晚上睡觉前，老婆一直在刷短视频，我催她睡觉，明天还要早起上班呢。<br>
+“别动我，心情不好，以后周天要轮流上课了”<br>
+“本来时间就少，现在周天还要补课，真是无语了”</p>
+<!-- more -->
+<p>我也不知道该说些什么，情况确实是如此。我们周内几乎没有时间陪小孩。老婆除了晚修每周有三天还能在六点下班，有晚修的情况下基本上看不到小孩，早上六点半左右出门，小孩还没起来，晚上十点以后回来，小孩早就睡着了。</p>
+<p>难免会这么焦虑。我睡醒了几次，半醒着发现老婆竟然去了书桌前刷短视频。<br>
+“怎么还不睡觉”，没有理我。就这样我醒了几次，有点担心了，索性我也起床说到，那我陪你聊会吧。</p>
+<p>就这样听着老婆数落她们学校各种离谱的管理。女生披着头发也要发给班主任批评，校服反着穿也不行，上课吃东西，或是趴在桌子上都不行。这些都会被年级组的人巡逻拍照发给班主任。</p>
+<p>听到这些我也是闻所未闻，比我们上学那会还管得宽。我说到“这特么有毛病吧，学生一点自由个性都不能有”，“都TM是一些什么教育理念，现在做管理都这么没有门槛吗？”“这都是些什么妖魔鬼怪”。跟老婆一起抱怨吐槽完了以后，她的心情终于舒坦了一些。</p>
+<p>“你什么时候帮我打教育局电话投诉去？”，我说好啊。“不过你要借个手机号，不能让别人知道是你投诉的”，原来教师家属的个人信息都被登记了。过了一会老婆睡得挺香，而我确失眠了。</p>
+]]></content>
+    </entry>
+</feed>
