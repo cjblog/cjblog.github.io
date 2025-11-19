@@ -1,0 +1,198 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>kafka消费的重平衡策略 | 土豆不吃鱼</title>
+<link rel="shortcut icon" href="https://cjblog.github.io/favicon.ico?v=1763519760031">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cjblog.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="kafka消费的重平衡策略 | 土豆不吃鱼 - Atom Feed" href="https://cjblog.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-143093516-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-143093516-1');
+</script>
+
+
+    <meta name="description" content="算法推理服务的日处理能力当前已经达到千万级别，我们的算法系统采用Kafka流式消费。系统经常面临的一个重要问题就是消息积压，这时候就需要增加推理算力。如何动态的增减推理实例数，以保障消息不丢失，同时也不需要修改服务代码。本文做了一个小实验，..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cjblog.github.io">
+  <img class="avatar" src="https://cjblog.github.io/images/avatar.png?v=1763519760031" alt="">
+  </a>
+  <h1 class="site-title">
+    土豆不吃鱼
+  </h1>
+  <p class="site-description">
+    做真实的自己，随遇而安
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              kafka消费的重平衡策略
+            </h2>
+            <div class="post-info">
+              <span>
+                2024-04-27
+              </span>
+              <span>
+                2 min read
+              </span>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://cjblog.github.io/post-images/kafka-xiao-fei-de-chong-ping-heng-ce-lue.png" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>算法推理服务的日处理能力当前已经达到千万级别，我们的算法系统采用Kafka流式消费。系统经常面临的一个重要问题就是消息积压，这时候就需要增加推理算力。如何动态的增减推理实例数，以保障消息不丢失，同时也不需要修改服务代码。本文做了一个小实验，验证多个消费者同时消费同一个topic，消息是否会丢失，或者存在重复消费的情况。</p>
+<!-- more -->
+<p>创建消费的topic 3个分区，意味着同一个消费者组最多3个消费者可以消费。消费者分别用3个消费脚本，每个消费者单进程消费。消费者不绑定分区，消费者实例采用默认的参数。具体参数可以参考<a href="https://kafka-python.readthedocs.io/en/master/apidoc/KafkaConsumer.html">kafka-python</a>。</p>
+<p>统计了消费结果如下：<br>
+<img src="https://cjblog.github.io/post-images/1714229434713.png" alt="" loading="lazy"></p>
+<p>上表中为offset结果，可以看到存在部分重复消费的情况，这是因为终端机消费者进程时，还未提交到集群，以至于偏移量offset没有更新。由于配置参数Kafka消费者每次最多poll10条数据，可以看到重复消费的情况并不严重。</p>
+<p>topic中放了999条record被全部消费，说明随机终止和重启消费者进程，并不会丢失record，说明Kafka集群的重平衡机制是可以信任的。其实Kafka的重平衡机制是由消费者参数`api_version``来指定的。</p>
+<blockquote>
+<p>api_version (tuple) –<br>
+Specify which Kafka API version to use. If set to None, the client will attempt to infer the broker version by probing various APIs. Different versions enable different functionality.<br>
+Examples<br>
+(0, 9)** enables full group coordination features with automatic<br>
+partition assignment and rebalancing**</p>
+</blockquote>
+<h2 id="结论">结论</h2>
+<p>通过实验随机中断和重复消费者，不影响Kafka的消费，同一个消费者组的消费者数变化，会触发集群的重平衡机制。重新分配消费者对应分区。</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%BB%93%E8%AE%BA">结论</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cjblog.github.io/post/an-zhuo-shou-ji-ting-hao-yong/">
+              <h3 class="post-title">
+                安卓手机挺好用
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cjblog.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

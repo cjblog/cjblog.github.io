@@ -1,0 +1,257 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>pip私有源服务搭建 | 土豆不吃鱼</title>
+<link rel="shortcut icon" href="https://cjblog.github.io/favicon.ico?v=1763519760031">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cjblog.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="pip私有源服务搭建 | 土豆不吃鱼 - Atom Feed" href="https://cjblog.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-143093516-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-143093516-1');
+</script>
+
+
+    <meta name="description" content="在服务器有网络的情况下，直接配置公开的源，速度已经非常快，也很方便。然而有些情况下服务器不方便安装网络，使用python安装包就变得非常麻烦，下载文件然后上传很折腾，如果团队这么做效率很低，这时就需要搭建私有的pip源。
+
+网上看了一些文章..." />
+    <meta name="keywords" content="python,编程" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cjblog.github.io">
+  <img class="avatar" src="https://cjblog.github.io/images/avatar.png?v=1763519760031" alt="">
+  </a>
+  <h1 class="site-title">
+    土豆不吃鱼
+  </h1>
+  <p class="site-description">
+    做真实的自己，随遇而安
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              pip私有源服务搭建
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-12-01
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+                <a href="https://cjblog.github.io/tag/qxlfE7Ehc/" class="post-tag">
+                  # python
+                </a>
+              
+                <a href="https://cjblog.github.io/tag/aYuQwwvrJI/" class="post-tag">
+                  # 编程
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://cjblog.github.io/post-images/pip-si-you-yuan-fu-wu-da-jian.webp" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>在服务器有网络的情况下，直接配置公开的源，速度已经非常快，也很方便。然而有些情况下服务器不方便安装网络，使用python安装包就变得非常麻烦，下载文件然后上传很折腾，如果团队这么做效率很低，这时就需要搭建私有的pip源。</p>
+<!-- more -->
+<p>网上看了一些文章基本都是在服务器直接安装配置，本文采用docker的方式部署，操作简单，配置少，经过验证效果挺好的。</p>
+<h2 id="服务安装">服务安装</h2>
+<p>采用docker的部署方式，减少环境依赖和命令配置。</p>
+<pre><code class="language-bash">docker pull muccg/devpi:latest
+</code></pre>
+<p>启动docker或者编写docker-compose.yaml文件，这里直接写配置文件比较方便</p>
+<pre><code class="language-bash">version: &quot;3&quot;
+services:
+  devpi-lib:
+    container_name: devpi-lib
+    image: muccg/devpi:latest
+    expose:
+      - 11023
+    ports:
+      - &quot;11023:11023&quot;
+      - &quot;3141:3141&quot;
+    environment:
+      - DEVPISERVER_HOST=ip
+      - DEVPISERVER_PORT=11023
+      - DEVPISERVER_ROOT_PASSWORD=password
+      - DEVPISERVER_USER=cj
+      - DEVPISERVER_PASSWORD=password
+      - DEVPISERVER_MIRROR_INDEX=pypi                    # 指定镜像index
+      - DEVPISERVER_LIB_INDEX=devpi                      # 指定上传index
+      - SOURCE_MIRROR_URL=https://pypi.tuna.tsinghua.edu.cn/simple  # 指定镜像源
+    restart: always
+    volumes:
+      - /mnt/hdd2/pypi:/var/lib/devpi
+</code></pre>
+<p>需要指定上面的ip，多起一个端口11023，以防后续使用。挂载一个目录用于后续文件交换。重要的配置为SOURCE_MIRROR_URL，对于没有的安装包从这个地址下载。容器启动后服务的端口为3141，需要配置着个端口。</p>
+<p>启动服务：</p>
+<pre><code class="language-bash">docker-compose -f docker-compose.yaml up -d
+</code></pre>
+<h2 id="测试安装包">测试安装包</h2>
+<p>需要改上面的ip地址，可以看到正常使用了。</p>
+<pre><code class="language-bash">pip install transformers -i http://ip:3141/root/pypi  --trusted-host ip
+</code></pre>
+<p>第一次安装包，速度非常慢，这是因为需要从安装源下载，后续再安装对应的包，直接从服务器缓存拉取，速度非常快。不过速度太慢也有办法处理，那就是在服务端下载好包文件，然后upload到服务器上。</p>
+<h2 id="文件上传到pip仓库">文件上传到pip仓库</h2>
+<p>下载安装包到上面的挂载目录/mnt/hdd2/pypi</p>
+<pre><code class="language-bash">pip wheel --wheel-dir /mnt/hdd2/pypi/ -r req.txt --cache-dir .cache/abc
+</code></pre>
+<p>准备上传文件，需要进入到容器中，对于容器不熟练的请自行查找命令。</p>
+<pre><code class="language-bash">docker exec -it container-id /bin/bash # 进入容器
+devpi login root # 无密码直接回车
+devpi upload --from-dir /var/lib/devpi #可以看到上传
+</code></pre>
+<p>之后再测试，安装包的速度可以达到几十上百MB。</p>
+<h2 id="配置反向代理">配置反向代理</h2>
+<p>经过多用户测试，并发很低，很多情况下可能会报错，应该是服务无法处理并发，配置nginx反向代理可以解决，不过先搭建好了，凑合用等用来经常出问题再配置吧。如果你碰到这个问题请自行配置nginx代理。</p>
+<h2 id="配置默认源">配置默认源</h2>
+<p>创建配置文件</p>
+<pre><code class="language-bash"># vim ~/.pip/pip.conf
+[global]
+index_url = http://&lt;host_ip&gt;:3141/root/pypi/
+trusted-host = &lt;host_ip&gt;
+[search]
+index = http://&lt;host_ip&gt;:3141/root/pypi/
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E5%AE%89%E8%A3%85">服务安装</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95%E5%AE%89%E8%A3%85%E5%8C%85">测试安装包</a></li>
+<li><a href="#%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%88%B0pip%E4%BB%93%E5%BA%93">文件上传到pip仓库</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86">配置反向代理</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE%E9%BB%98%E8%AE%A4%E6%BA%90">配置默认源</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cjblog.github.io/post/tritonserver-de-chang-yong-gong-neng-jie-shao/">
+              <h3 class="post-title">
+                TritonServer的常用功能介绍
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cjblog.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

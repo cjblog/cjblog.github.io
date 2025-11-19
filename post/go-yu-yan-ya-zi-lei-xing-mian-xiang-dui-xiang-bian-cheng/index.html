@@ -1,0 +1,341 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Go语言鸭子类型“面向对象”编程 | 土豆不吃鱼</title>
+<link rel="shortcut icon" href="https://cjblog.github.io/favicon.ico?v=1763519760031">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cjblog.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Go语言鸭子类型“面向对象”编程 | 土豆不吃鱼 - Atom Feed" href="https://cjblog.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-143093516-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-143093516-1');
+</script>
+
+
+    <meta name="description" content="
+Go语言鸭子类型“面向对象”编程
+
+介绍鸭子类型
+封装与继承
+多态
+构造方法
+多继承问题
+总结
+
+
+
+
+介绍鸭子类型
+我们知道Go语言没有class，也就意味着Go语言没有类和对象，也就无法做到真正意义上的面向对象编程。而面向对象编程非常..." />
+    <meta name="keywords" content="golang,编程" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cjblog.github.io">
+  <img class="avatar" src="https://cjblog.github.io/images/avatar.png?v=1763519760031" alt="">
+  </a>
+  <h1 class="site-title">
+    土豆不吃鱼
+  </h1>
+  <p class="site-description">
+    做真实的自己，随遇而安
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Go语言鸭子类型“面向对象”编程
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-09-19
+              </span>
+              <span>
+                6 min read
+              </span>
+              
+                <a href="https://cjblog.github.io/tag/6fk5VNGJa/" class="post-tag">
+                  # golang
+                </a>
+              
+                <a href="https://cjblog.github.io/tag/aYuQwwvrJI/" class="post-tag">
+                  # 编程
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://cjblog.github.io/post-images/go-yu-yan-ya-zi-lei-xing-mian-xiang-dui-xiang-bian-cheng.jpg" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <ul>
+<li><a href="#go%E8%AF%AD%E8%A8%80%E9%B8%AD%E5%AD%90%E7%B1%BB%E5%9E%8B%E2%80%9C%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E2%80%9D%E7%BC%96%E7%A8%8B">Go语言鸭子类型“面向对象”编程</a>
+<ul>
+<li><a href="#%E4%BB%8B%E7%BB%8D%E9%B8%AD%E5%AD%90%E7%B1%BB%E5%9E%8B">介绍鸭子类型</a></li>
+<li><a href="#%E5%B0%81%E8%A3%85%E4%B8%8E%E7%BB%A7%E6%89%BF">封装与继承</a></li>
+<li><a href="#%E5%A4%9A%E6%80%81">多态</a></li>
+<li><a href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95">构造方法</a></li>
+<li><a href="#%E5%A4%9A%E7%BB%A7%E6%89%BF%E9%97%AE%E9%A2%98">多继承问题</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+</ul>
+<!-- more -->
+<h2 id="介绍鸭子类型">介绍鸭子类型</h2>
+<p>我们知道Go语言没有class，也就意味着Go语言没有类和对象，也就无法做到真正意义上的面向对象编程。而面向对象编程非常重要的几个特性<code>封装、继承、重载、多态</code>。其中最重要的两个特性当属继承和多态了。继承可以实现类之间的抽象关系，多态保证了继承以后，可以实现更丰富的功能。</p>
+<p>Go语言通过“鸭子类型”的方式，也能实现<code>继承</code>和<code>多态</code>。所谓<code>鸭子类型</code>就是<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>:</p>
+<blockquote>
+<p>当看到一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟就可以被称为鸭子.</p>
+</blockquote>
+<h2 id="封装与继承">封装与继承</h2>
+<p>在Go语言中通过<strong>结构体的嵌套</strong>来模拟继承，结构体相当于封装了类的属性，结构体的方法，相当于类的方法，于是就实现了面向对象的封装和继承。</p>
+<pre><code class="language-go">type Animal struct {
+	Name string
+	Age  uint8
+}
+
+func (an *Animal) Cry() {
+	fmt.Println(an.Name, &quot;,I can cry!&quot;)
+}
+
+type Duck struct {
+	Animal
+	Type string // 简单分类，卵生动物
+}
+
+func (duck *Duck) Cry() {
+	fmt.Println(duck.Name, &quot;,I can Cry Ga Ga!&quot;)
+}
+
+type Dog struct {
+	Animal
+	Type string // 哺乳动物
+}
+
+func (dog *Dog) Cry() {
+	fmt.Println(dog.Name, &quot;,I can cry Wow Wow!&quot;)
+}
+</code></pre>
+<p><code>封装</code>通过<code>Set</code>和<code>Get</code>方法提供属性的修改和访问，方便保护属性的安全。把属性定义小写字母开头，不支持导出即可，这样在别的包使用时，只能通过<code>Set</code>和<code>Get</code>方法，而不能直接访问属性值，此处没有具体演示代码。</p>
+<h2 id="多态">多态</h2>
+<p>上面代码演示了“类的继承”，这就是鸭子类型，长得像“类”，有属性和方法，并且还对属性实现了封装，就可以称为“类”。如果子结构体没有覆盖父结构的方法，就会默认调用父类的方法。而通过重写覆盖父类方法可以容易的实现多态。</p>
+<p>不过这里有个小问题，继承的子结构与父结构不是一个类型了，虽然每个子结构体都实现了对应的方法，如何进行统一处理呢？</p>
+<p>要实现多态还需要借助<code>interface</code>，将上面的<code>Cry</code>方法统一放在<code>interface</code>中。</p>
+<pre><code class="language-go">type Action interface {
+	Cry()
+}
+</code></pre>
+<p>上面的<code>Animal、Dog、Duck</code>结构体都实现了<code>Cry</code>方法，也是Action类型了。那就可以作为Action来统一处理。</p>
+<pre><code class="language-go">type Cat struct {
+	Animal
+	Type string
+}
+
+func (cat *Cat) Cry() {
+	fmt.Println(cat.Name, &quot;, I can cry Miu Miu!&quot;)
+}
+
+func main() {
+	dog := Dog{Animal: Animal{Name: &quot;Jason&quot;}, Type: &quot;哺乳动物&quot;}
+	duck := Duck{Animal: Animal{Name: &quot;Tang&quot;}, Type: &quot;卵生动物&quot;}
+	cat := Cat{Animal: Animal{Name: &quot;Tom&quot;}, Type: &quot;哺乳动物&quot;}
+
+	var animal = []Action{&amp;dog, &amp;duck}
+	animal = append(animal, &amp;cat)
+
+	for _, each := range animal {
+		each.Cry()
+	}
+}
+
+// Jason ,I can cry Wow Wow!
+// Tang ,I can Cry Ga Ga!
+// Tom , I can cry Miu Miu!
+</code></pre>
+<p>通过上面的例子，基本上实现了面向对象的一些特性，为什么是基本上呢？原因是面向对象编程在对象创建之后，如果没有构造方法会继承父类的构造方法，而Go语言嵌套结构体实例化仍然需要输入父结构体类型，如果多层嵌套，那么初始化的代码将非常难看。</p>
+<h2 id="构造方法">构造方法</h2>
+<p>给每个结构体单独写一个构造函数，函数内部完成实例化的动作。比如给<code>Dog</code>、<code>Duck</code>、<code>Cat</code> 分别写一个构造函数。这里只写<code>Dog</code>的构造方法，其余类似。</p>
+<pre><code class="language-go">// 构造方法
+func NewDog(name, _type string, age uint8) *Dog {
+	return &amp;Dog{
+		Animal: Animal{Name: name, Age: age},
+		Type:   _type,
+	}
+}
+
+dog := NewDog(&quot;Jason&quot;, &quot;哺乳动物&quot;, 10)
+duck := NewDuck(&quot;Tang&quot;, &quot;卵生动物&quot;, 2)
+cat := NewCat(&quot;Tom&quot;, &quot;哺乳动物&quot;, 3)
+</code></pre>
+<p>通过构造方法直接实例化结构体.</p>
+<h2 id="多继承问题">多继承问题</h2>
+<p>继承是面向对象中非常重要的概念，上面的代码只实现了单继承，通过<strong>匿名嵌套</strong>结构体就可以了。如果是多继承，也就是嵌套多个结构体，每个结构体无法避免的存在相同的属性名和方法名，这样在访问的时候就会出问题，是的编译器不会让这种情况发生。</p>
+<p>比如定义奇怪的Robot，继承<code>Dog</code>和<code>Cat</code>，具有两种动物的属性和方法，依然使用匿名嵌套的方式定义：</p>
+<pre><code class="language-go">type Robot struct {
+	Dog
+	Cat
+}
+
+r := Robot{Dog: *dog, Cat: *cat}
+fmt.Println(r.Dog.Age)
+fmt.Println(r.Cat.Age)
+</code></pre>
+<p>如果直接访问属性和访问，编译器报错。最好的方式是定义<strong>具名嵌套</strong>，这样就不会出错了。</p>
+<pre><code class="language-go">type Robot struct {
+	Dog *Dog
+	Cat *Cat
+}
+
+r := Robot{Dog: dog, Cat: cat}
+fmt.Println(r.Dog.Age)
+r.Dog.Cry()
+</code></pre>
+<p>看起来使用差不多，实际上代码补全提示时，不会<strong>提示非法的属性和方法</strong>。</p>
+<h2 id="总结">总结</h2>
+<p>本文主要讨论了Go语言通过鸭子类型来实现面向对象编程，可以看到通过组合几种数据结构，基本能够模拟出面向对象的大部分概念，这正是Go语言设计的哲学，语言的设计尽量简洁，去除多余的概念，通过<strong>组合</strong>来实现更多数据结构和编程方法。</p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://zh.wikipedia.org/wiki/%E9%B8%AD%E5%AD%90%E7%B1%BB%E5%9E%8B">https://zh.wikipedia.org/wiki/鸭子类型</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%BB%8B%E7%BB%8D%E9%B8%AD%E5%AD%90%E7%B1%BB%E5%9E%8B">介绍鸭子类型</a></li>
+<li><a href="#%E5%B0%81%E8%A3%85%E4%B8%8E%E7%BB%A7%E6%89%BF">封装与继承</a></li>
+<li><a href="#%E5%A4%9A%E6%80%81">多态</a></li>
+<li><a href="#%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95">构造方法</a></li>
+<li><a href="#%E5%A4%9A%E7%BB%A7%E6%89%BF%E9%97%AE%E9%A2%98">多继承问题</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cjblog.github.io/post/meng-te-qia-luo-fa-ji-suan-yuan-zhou-lu-wu-chai-fen-xi/">
+              <h3 class="post-title">
+                蒙特卡洛法计算圆周率误差分析
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cjblog.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

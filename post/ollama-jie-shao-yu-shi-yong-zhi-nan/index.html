@@ -1,0 +1,479 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ollama介绍与使用指南 | 土豆不吃鱼</title>
+<link rel="shortcut icon" href="https://cjblog.github.io/favicon.ico?v=1763519760031">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cjblog.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Ollama介绍与使用指南 | 土豆不吃鱼 - Atom Feed" href="https://cjblog.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-143093516-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-143093516-1');
+</script>
+
+
+    <meta name="description" content="Ollama 是一个强大的本地推理大模型平台，旨在简化模型的本地部署、管理和推理工作流。它允许用户在本地机器上拉取、管理、运行大模型，并提供多种访问方式，包括本地 CLI、HTTP 接口以及通过 OpenAI 客户端的集成。这篇文章将详细介..." />
+    <meta name="keywords" content="编程" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cjblog.github.io">
+  <img class="avatar" src="https://cjblog.github.io/images/avatar.png?v=1763519760031" alt="">
+  </a>
+  <h1 class="site-title">
+    土豆不吃鱼
+  </h1>
+  <p class="site-description">
+    做真实的自己，随遇而安
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Ollama介绍与使用指南
+            </h2>
+            <div class="post-info">
+              <span>
+                2024-09-28
+              </span>
+              <span>
+                12 min read
+              </span>
+              
+                <a href="https://cjblog.github.io/tag/aYuQwwvrJI/" class="post-tag">
+                  # 编程
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://ollama.com/public/assets/c889cc0d-cb83-4c46-a98e-0d0e273151b9/42f6b28d-9117-48cd-ac0d-44baaf5c178e.png" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <p>Ollama 是一个强大的本地推理大模型平台，旨在简化模型的本地部署、管理和推理工作流。它允许用户在本地机器上拉取、管理、运行大模型，并提供多种访问方式，包括本地 CLI、HTTP 接口以及通过 OpenAI 客户端的集成。这篇文章将详细介绍 Ollama 的功能，如何使用 Ollama 拉取模型、运行模型，并通过多种方式访问推理服务。</p>
+<!-- more -->
+<h2 id="一-ollama的主要功能">一、Ollama的主要功能</h2>
+<p>Ollama 的核心功能包括：</p>
+<ol>
+<li><strong>本地模型管理</strong>：Ollama 支持从官方模型库或自定义模型库拉取预训练模型，并在本地保存和加载。它支持各种流行的模型格式（如 ONNX、PyTorch、TensorFlow）。</li>
+<li><strong>高效推理</strong>：通过 GPU/CPU 的加速，Ollama 提供高效的模型推理，适合本地化应用或需要控制数据隐私的场景。</li>
+<li><strong>多种接口访问</strong>：Ollama 支持命令行（CLI）、HTTP 接口访问推理服务，并通过 OpenAI 客户端实现更广泛的集成。</li>
+<li><strong>环境变量配置</strong>：通过灵活的环境变量，用户可以自定义推理设备（GPU/CPU）、缓存路径、并发数、日志级别等。</li>
+</ol>
+<p>接下来我们将详细介绍 Ollama 的安装、常用命令、如何拉取和运行模型、以及不同方式访问 Ollama 推理服务。</p>
+<h2 id="二-ollama的安装与基本配置">二、Ollama的安装与基本配置</h2>
+<h3 id="1-安装-ollama">1. 安装 Ollama</h3>
+<h4 id="11-获取桌面软件">1.1 获取桌面软件</h4>
+<p>安装桌面软件可以去官网下载：<a href="https://ollama.com/download">ollama</a></p>
+<h4 id="12-命令行安装">1.2 命令行安装</h4>
+<p>要安装 Ollama，首先需要在系统中安装 Ollama CLI 工具。可以通过以下命令安装：</p>
+<pre><code class="language-bash"># macOS 用户
+brew install ollama
+
+# Linux 用户（以 Ubuntu 为例）
+curl -s https://ollama.com/install | bash
+
+# Windows 用户可以通过 WSL2 安装，参考官网文档获取更多细节
+</code></pre>
+<h4 id="13-docker镜像">1.3 docker镜像</h4>
+<p>去下载官方镜像<a href="https://hub.docker.com/r/ollama/ollama">Ollama Docker image</a>。一般高端计算显卡都放在远程，推荐使用docker容器化安装。本文的后续操作也是基于容器化安装。<br>
+启动命令按照docker正常启动就行，可以参考我的启动命令，自行修改</p>
+<pre><code class="language-bash">docker run -d --gpus=all \
+ -e OLLAMA_KEEP_ALIVE=-1 \
+ -e OLLAMA_NUM_PARALLEL=4  \
+ -e OLLAMA_FLASH_ATTENTION=1  \
+ -v /data3/alex/ollama:/root/.ollama  \
+ -p 23153:11434 --name ollama-vincent docker.io/ollama/ollama:0.3.11
+</code></pre>
+<h3 id="2-配置-ollama">2. 配置 Ollama</h3>
+<p>Ollama 允许通过环境变量进行配置。常见的环境变量包括：</p>
+<ul>
+<li><strong>OLLAMA_MODEL_PATH</strong>：指定模型存储路径</li>
+<li><strong>OLLAMA_DEVICE</strong>：选择推理使用的设备（如 <code>cpu</code> 或 <code>gpu</code>）</li>
+<li><strong>OLLAMA_LOG_LEVEL</strong>：设置日志级别（如 <code>debug</code>, <code>info</code>）</li>
+</ul>
+<p>例如：</p>
+<pre><code class="language-bash">export OLLAMA_MODEL_PATH=~/ollama_models
+export OLLAMA_DEVICE=gpu
+export OLLAMA_LOG_LEVEL=debug
+</code></pre>
+<p>更多环境变量可以参考命令的输出：</p>
+<pre><code class="language-bash">root@6b5c84c53d0e:/# ollama serve -h
+Start ollama
+
+Usage:
+  ollama serve [flags]
+
+Aliases:
+  serve, start
+
+Flags:
+  -h, --help   help for serve
+
+Environment Variables:
+      OLLAMA_DEBUG               Show additional debug information (e.g. OLLAMA_DEBUG=1)
+      OLLAMA_HOST                IP Address for the ollama server (default 127.0.0.1:11434)
+      OLLAMA_KEEP_ALIVE          The duration that models stay loaded in memory (default &quot;5m&quot;)
+      OLLAMA_MAX_LOADED_MODELS   Maximum number of loaded models per GPU
+      OLLAMA_MAX_QUEUE           Maximum number of queued requests
+      OLLAMA_MODELS              The path to the models directory
+      OLLAMA_NUM_PARALLEL        Maximum number of parallel requests
+      OLLAMA_NOPRUNE             Do not prune model blobs on startup
+      OLLAMA_ORIGINS             A comma separated list of allowed origins
+      OLLAMA_SCHED_SPREAD        Always schedule model across all GPUs
+      OLLAMA_TMPDIR              Location for temporary files
+      OLLAMA_FLASH_ATTENTION     Enabled flash attention
+      OLLAMA_LLM_LIBRARY         Set LLM library to bypass autodetection
+      OLLAMA_GPU_OVERHEAD        Reserve a portion of VRAM per GPU (bytes)
+      OLLAMA_LOAD_TIMEOUT        How long to allow model loads to stall before giving up (default &quot;5m&quot;)
+</code></pre>
+<h2 id="三-常用的-ollama-命令">三、常用的 Ollama 命令</h2>
+<p>Ollama 提供了多种命令，方便用户进行模型管理和推理。下面介绍一些常用的命令。</p>
+<h3 id="1-查看帮助信息">1. 查看帮助信息</h3>
+<p>要查看 Ollama 支持的所有命令及其用法，可以使用以下命令：</p>
+<pre><code class="language-bash">ollama help
+</code></pre>
+<p>这将列出所有支持的命令和相关说明，例如 <code>run</code>、<code>list</code>、<code>pull</code> 等。</p>
+<h3 id="2-查看可用模型">2. 查看可用模型</h3>
+<p>要查看 Ollama 官方支持的模型，可以运行以下命令：</p>
+<pre><code class="language-bash">ollama list
+</code></pre>
+<p>这将返回一个可用模型的列表，包括模型的名称、版本等信息。</p>
+<h3 id="3-拉取模型">3. 拉取模型</h3>
+<p>要拉取某个模型到本地进行推理，使用 <code>pull</code> 命令。例如，拉取一个名为 <code>llama2</code> 的模型：</p>
+<pre><code class="language-bash">ollama pull llama2
+</code></pre>
+<p>该命令会将模型下载并存储在本地的 <code>OLLAMA_MODEL_PATH</code> 路径中。如果没有指定该路径，Ollama 会使用默认存储路径。</p>
+<h3 id="4-删除模型">4. 删除模型</h3>
+<p>如果不再需要某个模型，可以使用 <code>remove</code> 命令将其从本地删除：</p>
+<pre><code class="language-bash">ollama remove llama2
+</code></pre>
+<h3 id="5-检查模型状态">5. 检查模型状态</h3>
+<p>使用 <code>ps</code> 命令可以查看当前模型的状态，包括是否已加载到内存中，设备信息等：</p>
+<pre><code class="language-bash">root@6b5c84c53d0e:/# ollama ps
+NAME                         ID              SIZE      PROCESSOR    UNTIL
+qwen2:7b-instruct            e0d4e1163c58    5.7 GB    100% GPU     Forever
+qwen2.5:1.5b                 65ec06548149    2.0 GB    100% GPU     Forever
+qwen2.5:0.5b                 a8b0c5157701    1.3 GB    100% GPU     Forever
+llama3.2:3b-instruct-fp16    195a8c01d91e    8.5 GB    100% GPU     Forever
+glm4:9b                      5b699761eca5    6.6 GB    100% GPU     Forever
+</code></pre>
+<h2 id="四-运行模型">四、运行模型</h2>
+<p>模型拉取完成后，Ollama 提供了简便的方式来运行推理任务。以下介绍如何通过命令行、HTTP 接口和 OpenAI 客户端访问推理服务。</p>
+<h3 id="1-通过命令行运行模型">1. 通过命令行运行模型</h3>
+<p>要在命令行中运行模型进行推理，可以使用 <code>run</code> 命令。例如，运行 <code>llama2</code> 模型并输入一句话让其进行推理：</p>
+<pre><code class="language-bash">ollama run llama2 &quot;Hello, how are you today?&quot;
+</code></pre>
+<p>输出将显示模型生成的结果。<code>run</code> 命令支持传递不同的参数，例如设置生成的最大长度、温度等参数：</p>
+<pre><code class="language-bash">ollama run llama2 &quot;Hello!&quot; --max_length 50 --temperature 0.8
+</code></pre>
+<p>最好是直接进入本地交互环境</p>
+<pre><code class="language-bash">root@6b5c84c53d0e:/# ollama run qwen2:7b-instruct
+&gt;&gt;&gt; 你能做什么，你是什么模型
+我是一个大型语言模型，被训练来生成与各种主题相关的文本内容。我可以帮助解答问题、提供信息、进行对话、撰写文章、故事或邮件等。尽管我的
+能力在不断扩展和优化中，但我并不能执行需要实际物体操作或者具有特定领域专业知识的任务。
+
+我是通义千问大模型的增强版本，名为通义万相，主要用于处理语言生成任务，并以图像形式输出结果。通过将自然语言指令转化为图像，我可以帮助
+用户获得创意设计、插画、图像修改以及其他基于视觉的需求。我的核心功能是理解文本输入并将其转换为与之相关的高质量图像输出。
+
+请注意，在某些情况下我可能会犯错误或者给出不准确的回答，请您根据实际情况进行判断和验证信息的正确性。我会不断地学习和进步，希望在帮助
+用户解决问题和提供有价值的信息方面发挥积极作用。
+&gt;&gt;&gt; 
+</code></pre>
+<h3 id="2-通过-http-访问">2. 通过 HTTP 访问</h3>
+<p>Ollama 还提供了 HTTP 接口，允许用户通过 REST API 调用模型进行推理。</p>
+<h4 id="启动-http-服务">启动 HTTP 服务</h4>
+<p>首先，需要启动 Ollama 的 HTTP 服务，可以通过以下命令启动服务：</p>
+<pre><code class="language-bash">ollama serve
+</code></pre>
+<p>这将启动一个本地 HTTP 服务器，默认情况下监听 <code>localhost:11434</code>。你可以通过浏览器或 Postman 访问 API 进行测试。<br>
+如果使用上面的容器化安装，启动容器以后，服务已经启动了，使用ollama ps 命令就能看到已经running的模型服务。</p>
+<h4 id="发起-http-请求">发起 HTTP 请求</h4>
+<p>使用 <code>curl</code> 命令发起 HTTP 请求，调用 <code>llama2</code> 模型进行推理：</p>
+<pre><code class="language-bash">curl -X POST http://localhost:11434/v1/models/llama2/completions \
+-H &quot;Content-Type: application/json&quot; \
+-d '{
+  &quot;prompt&quot;: &quot;Tell me a joke&quot;,
+  &quot;max_length&quot;: 50,
+  &quot;temperature&quot;: 0.7
+}'
+</code></pre>
+<p>该请求将返回模型生成的文本。响应格式为 JSON，例如：</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;cmpl-5sWYxF&quot;,
+  &quot;object&quot;: &quot;text_completion&quot;,
+  &quot;created&quot;: 1690243381,
+  &quot;model&quot;: &quot;llama2&quot;,
+  &quot;choices&quot;: [
+    {
+      &quot;text&quot;: &quot;Why don't scientists trust atoms? Because they make up everything!&quot;
+    }
+  ]
+}
+</code></pre>
+<p>也支持chat调用接口</p>
+<pre><code class="language-json">curl --location 'http://localhost:11434/v1/chat/completions' \
+--header 'Content-Type: application/json' \
+--data '{
+    &quot;model&quot;: &quot;qwen2:7b-instruct&quot;,
+    &quot;stream&quot;: false,
+    &quot;messages&quot;: [
+        {
+            &quot;role&quot;: &quot;user&quot;,
+            &quot;content&quot;: &quot;你是谁，可以做什么？&quot;
+        }
+    ],
+    &quot;temperature&quot;: 0
+}'
+</code></pre>
+<pre><code class="language-json">{
+    &quot;id&quot;: &quot;chatcmpl-568&quot;,
+    &quot;object&quot;: &quot;chat.completion&quot;,
+    &quot;created&quot;: 1727494268,
+    &quot;model&quot;: &quot;qwen2:7b-instruct&quot;,
+    &quot;system_fingerprint&quot;: &quot;fp_ollama&quot;,
+    &quot;choices&quot;: [
+        {
+            &quot;index&quot;: 0,
+            &quot;message&quot;: {
+                &quot;role&quot;: &quot;assistant&quot;,
+                &quot;content&quot;: &quot;我是阿里云开发的一款超大规模语言模型，我叫通义千问。我可以生成各种文本内容、回答问题、提供信息咨询等任务。你可以问我各种问题或者需要创作一些文本，我会尽力帮助你。如果你有任何需求，请随时告诉我！&quot;
+            },
+            &quot;finish_reason&quot;: &quot;stop&quot;
+        }
+    ],
+    &quot;usage&quot;: {
+        &quot;prompt_tokens&quot;: 14,
+        &quot;completion_tokens&quot;: 55,
+        &quot;total_tokens&quot;: 69
+    }
+}
+</code></pre>
+<h3 id="3-通过-openai-客户端访问">3. 通过 OpenAI 客户端访问</h3>
+<p>Ollama 支持通过 OpenAI 的 API 客户端访问本地的模型推理服务，这样你可以使用类似调用 OpenAI API 的方式来调用本地的 Ollama 模型。</p>
+<h4 id="配置-openai-客户端">配置 OpenAI 客户端</h4>
+<p>首先，需要将 OpenAI 客户端的 API 请求重定向到本地 Ollama 服务。你可以使用以下命令指定 Ollama 服务的 API 密钥和本地 API 端点：</p>
+<pre><code class="language-bash">export OPENAI_API_KEY=ollama-api-key
+export OPENAI_API_BASE_URL=http://localhost:11434/v1
+</code></pre>
+<p>此时，任何通过 OpenAI 客户端发起的请求将会转发给 Ollama 的本地服务。</p>
+<h4 id="通过-openai-客户端发起请求">通过 OpenAI 客户端发起请求</h4>
+<p>使用 OpenAI Python SDK 或其他 OpenAI 客户端库调用 Ollama 模型进行推理。例如，使用 Python 调用 <code>llama2</code> 模型：</p>
+<pre><code class="language-python">import openai
+
+openai.api_key = 'ollama-api-key'
+openai.api_base = 'http://localhost:11434/v1'
+
+response = openai.Completion.create(
+  model=&quot;llama2&quot;,
+  prompt=&quot;What is the capital of France?&quot;,
+  max_tokens=50
+)
+
+print(response.choices[0].text.strip())
+</code></pre>
+<p>该代码将通过本地的 Ollama 服务运行 <code>llama2</code> 模型，并返回结果。</p>
+<h2 id="五-ollama的并发与性能优化">五、Ollama的并发与性能优化</h2>
+<p>Ollama 支持通过设置环境变量来优化并发处理和性能。常用的性能优化配置包括：</p>
+<ul>
+<li>
+<p><strong>并发限制</strong>：通过 <code>OLLAMA_CONCURRENCY</code> 设置最大并发请求数。例如：</p>
+<pre><code class="language-bash">export OLLAMA_CONCURRENCY=4
+</code></pre>
+</li>
+<li>
+<p><strong>批处理大小</strong>：通过 <code>OLLAMA_MAX_BATCH_SIZE</code> 设置批处理推理的最大大小，优化推理吞吐量。例如：</p>
+<pre><code class="language-bash">export OLLAMA_MAX_BATCH_SIZE=16
+</code></pre>
+</li>
+<li>
+<p><strong>缓存管理</strong>：通过 <code>OLLAMA_CACHE_PATH</code> 设置缓存路径，加速重复推理请求的处理。</p>
+</li>
+</ul>
+<h2 id="六-日志与调试">六、日志与调试</h2>
+<p>Ollama 提供详细的日志功能，帮助开发者进行调试和性能监控。通过 <code>OLLAMA_LOG_LEVEL</code> 环境变量，用户可以控制日志的详细程度，例如：</p>
+<pre><code class="language-bash">export OLLAMA_LOG_LEVEL=debug
+</code></pre>
+<p>日志文件可以通过 <code>OLLAMA_LOG_FILE</code> 指定路径进行存储。例如：</p>
+<pre><code class="language-bash">export OLLAMA_LOG_FILE=~/ollama_logs/debug.log
+</code></pre>
+<p>日志级别包括 <code>debug</code>、<code>info</code>、<code>warn</code> 和 <code>error</code>。设置为 <code>debug</code> 级别时，系统会记录详细的调试信息，帮助开发者排查问题。</p>
+<h2 id="七-总结">七、总结</h2>
+<p>Ollama 是一个强大的本地大模型推理平台，支持用户通过命令行、HTTP API 和 OpenAI 客户端进行多样化的模型调用。通过合理配置环境变量和优化推理流程，Ollama 能够为用户提供高效的本地化推理解决方案。</p>
+<p>无论是在隐私敏感的本地化环境中，还是需要高性能的大规模推理任务，Ollama 都是一个理想的选择。</p>
+<p>希望本文为你提供了清晰的 Ollama 基础使用指南，从模型拉取、推理，到多种访问方式，你现在可以轻松开始使用 Ollama 进行本地化模型推理了！</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%B8%80-ollama%E7%9A%84%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD">一、Ollama的主要功能</a></li>
+<li><a href="#%E4%BA%8C-ollama%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE">二、Ollama的安装与基本配置</a>
+<ul>
+<li><a href="#1-%E5%AE%89%E8%A3%85-ollama">1. 安装 Ollama</a>
+<ul>
+<li><a href="#11-%E8%8E%B7%E5%8F%96%E6%A1%8C%E9%9D%A2%E8%BD%AF%E4%BB%B6">1.1 获取桌面软件</a></li>
+<li><a href="#12-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%AE%89%E8%A3%85">1.2 命令行安装</a></li>
+<li><a href="#13-docker%E9%95%9C%E5%83%8F">1.3 docker镜像</a></li>
+</ul>
+</li>
+<li><a href="#2-%E9%85%8D%E7%BD%AE-ollama">2. 配置 Ollama</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%89-%E5%B8%B8%E7%94%A8%E7%9A%84-ollama-%E5%91%BD%E4%BB%A4">三、常用的 Ollama 命令</a>
+<ul>
+<li><a href="#1-%E6%9F%A5%E7%9C%8B%E5%B8%AE%E5%8A%A9%E4%BF%A1%E6%81%AF">1. 查看帮助信息</a></li>
+<li><a href="#2-%E6%9F%A5%E7%9C%8B%E5%8F%AF%E7%94%A8%E6%A8%A1%E5%9E%8B">2. 查看可用模型</a></li>
+<li><a href="#3-%E6%8B%89%E5%8F%96%E6%A8%A1%E5%9E%8B">3. 拉取模型</a></li>
+<li><a href="#4-%E5%88%A0%E9%99%A4%E6%A8%A1%E5%9E%8B">4. 删除模型</a></li>
+<li><a href="#5-%E6%A3%80%E6%9F%A5%E6%A8%A1%E5%9E%8B%E7%8A%B6%E6%80%81">5. 检查模型状态</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9B%9B-%E8%BF%90%E8%A1%8C%E6%A8%A1%E5%9E%8B">四、运行模型</a>
+<ul>
+<li><a href="#1-%E9%80%9A%E8%BF%87%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%BF%90%E8%A1%8C%E6%A8%A1%E5%9E%8B">1. 通过命令行运行模型</a></li>
+<li><a href="#2-%E9%80%9A%E8%BF%87-http-%E8%AE%BF%E9%97%AE">2. 通过 HTTP 访问</a>
+<ul>
+<li><a href="#%E5%90%AF%E5%8A%A8-http-%E6%9C%8D%E5%8A%A1">启动 HTTP 服务</a></li>
+<li><a href="#%E5%8F%91%E8%B5%B7-http-%E8%AF%B7%E6%B1%82">发起 HTTP 请求</a></li>
+</ul>
+</li>
+<li><a href="#3-%E9%80%9A%E8%BF%87-openai-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BF%E9%97%AE">3. 通过 OpenAI 客户端访问</a>
+<ul>
+<li><a href="#%E9%85%8D%E7%BD%AE-openai-%E5%AE%A2%E6%88%B7%E7%AB%AF">配置 OpenAI 客户端</a></li>
+<li><a href="#%E9%80%9A%E8%BF%87-openai-%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%8F%91%E8%B5%B7%E8%AF%B7%E6%B1%82">通过 OpenAI 客户端发起请求</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E4%BA%94-ollama%E7%9A%84%E5%B9%B6%E5%8F%91%E4%B8%8E%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96">五、Ollama的并发与性能优化</a></li>
+<li><a href="#%E5%85%AD-%E6%97%A5%E5%BF%97%E4%B8%8E%E8%B0%83%E8%AF%95">六、日志与调试</a></li>
+<li><a href="#%E4%B8%83-%E6%80%BB%E7%BB%93">七、总结</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cjblog.github.io/post/kafka-xiao-fei-de-chong-ping-heng-ce-lue/">
+              <h3 class="post-title">
+                kafka消费的重平衡策略
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cjblog.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

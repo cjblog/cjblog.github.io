@@ -1,0 +1,600 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TritonServer的常用功能介绍 | 土豆不吃鱼</title>
+<link rel="shortcut icon" href="https://cjblog.github.io/favicon.ico?v=1763519760031">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cjblog.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="TritonServer的常用功能介绍 | 土豆不吃鱼 - Atom Feed" href="https://cjblog.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-143093516-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-143093516-1');
+</script>
+
+
+    <meta name="description" content="一、概述
+Triton 推理服务器可助力团队在任意基于 GPU 或 CPU 的基础设施上部署、运行和扩展任意框架中经过训练的 AI 模型，进而精简 AI 推理。同时，AI 研究人员和数据科学家可在不影响生产部署的情况下，针对其项目自由选择合..." />
+    <meta name="keywords" content="算法,深度学习" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://cjblog.github.io">
+  <img class="avatar" src="https://cjblog.github.io/images/avatar.png?v=1763519760031" alt="">
+  </a>
+  <h1 class="site-title">
+    土豆不吃鱼
+  </h1>
+  <p class="site-description">
+    做真实的自己，随遇而安
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              TritonServer的常用功能介绍
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-11-29
+              </span>
+              <span>
+                12 min read
+              </span>
+              
+                <a href="https://cjblog.github.io/tag/5YlVz1pNl/" class="post-tag">
+                  # 算法
+                </a>
+              
+                <a href="https://cjblog.github.io/tag/Kwq8B2WgT7/" class="post-tag">
+                  # 深度学习
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://cjblog.github.io/post-images/tritonserver-de-chang-yong-gong-neng-jie-shao.jpg" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h2 id="一-概述">一、概述</h2>
+<p>Triton 推理服务器可助力团队在任意基于 GPU 或 CPU 的基础设施上部署、运行和扩展任意框架中经过训练的 AI 模型，进而精简 AI 推理。同时，AI 研究人员和数据科学家可在不影响生产部署的情况下，针对其项目自由选择合适的框架。它还帮助开发者跨云、本地、边缘和嵌入式设备提供高性能推理。</p>
+<!-- more -->
+<ol>
+<li><strong>支持多个框架</strong>。Triton 推理服务器支持所有主流框架，例如 TensorFlow、NVIDIA® TensorRT™、PyTorch、MXNet、Python、ONNX、RAPIDS™ FIL（用于 XGBoost、scikit-learn 等）、OpenVINO、自定义 C++ 等</li>
+<li><strong>高性能推理</strong>。Triton 支持所有基于 NVIDIA GPU、x86 和 ARM® CPU 的推理。它具有动态批处理、并发执行、最优模型配置、模型集成和串流输入等功能，可更大限度地提高吞吐量和利用率。Triton 可在单个 GPU 或 CPU 上并行指定相同或不同框架下的多个模型。在多 GPU 服务器中，Triton 会自动为基于每个 GPU 的每个模型创建一个实例，以提高利用率；它还可在严格的延迟限制条件下优化实时推理服务，<strong>通过支持批量推理来更大限度地提高 GPU 和 CPU 利用率</strong>，并内置对音频和视频流输入的支持。<strong>对于需要使用多个模型来执行端到端推理（例如对话式 AI）的用例，Triton 支持模型集成</strong>；<strong>模型可在生产环境中实时更新，无需重启 Triton 或应用。Triton 支持对单个 GPU 显存无法容纳的超大模型进行多 GPU 以及多节点推理。</strong></li>
+<li><strong>专为 DevOps 和 MLOps 设计</strong>。Triton 与 Kubernetes 集成，可用于编排和扩展，导出 Prometheus 指标进行监控，支持实时模型更新，并可用于所有主流的公有云 AI 和 Kubernetes 平台。它还与许多 MLOPS 软件解决方案集成。</li>
+</ol>
+<h2 id="二-快速部署">二、快速部署</h2>
+<h3 id="准备tritonserver的镜像">准备tritonserver的镜像</h3>
+<p>拉取官方镜像：</p>
+<pre><code class="language-bash">docker pull nvcr.io/nvidia/tritonserver:21.10-py3
+</code></pre>
+<p>在算法服务器上已经有基础的tritonserver镜像，如果使用transformers需要自行安装模块。</p>
+<pre><code class="language-bash">nvcr.io/nvidia/tritonserver:21.10-py3-base
+</code></pre>
+<p>由于采用ONNX格式的模型文件，推理框架与训练框架无关。统一采用onnxruntime推理框架。下面以发文通用情感词为例，需要修改两个配置文件。</p>
+<h3 id="完成配置文件">完成配置文件</h3>
+<p>将onnx格式模型放到配置文件emotion_content_model/1/，数字1表示当前版本，模型的配置文件<strong>emotion_content_model/config.pbtxt</strong>，主要配置实例数和推理资源。</p>
+<pre><code class="language-bash">platform: &quot;onnxruntime_onnx&quot;
+max_batch_size: 1024
+input [
+    {
+      name: &quot;input_ids&quot;
+      data_type: TYPE_INT64
+      dims: [ -1 ]
+    },
+    {
+      name: &quot;token_type_ids&quot;
+      data_type: TYPE_INT64
+      dims: [ -1 ]
+    }
+]
+output [
+    {
+      name: &quot;linear_75.tmp_1&quot;
+      data_type: TYPE_FP32
+      dims: [ 2 ]
+    }
+]
+
+instance_group [
+  {
+      count: 1
+      kind: KIND_GPU
+  }
+]
+</code></pre>
+<p>第二个配置文件<strong>emotion_content/config.pbtxt</strong> 。这个文件主要是配置端到端的模型，定义tokenizer模型-&gt;模型推理-&gt;proprecess后处理模型，3个模型的数据流。配置文件通常只需要改动模型名称,model_name: &quot;emotion_content_model&quot;，其余保持不变。</p>
+<pre><code class="language-bash">output_map {
+        key: &quot;OUTPUT_1&quot;
+        value: &quot;tokenizer_token_type_ids&quot;
+      }
+    },
+    {
+      model_name: &quot;emotion_content_model&quot;
+      model_version: 1
+      input_map {
+        key: &quot;input_ids&quot;
+        value: &quot;tokenizer_input_ids&quot;
+      }
+      input_map {
+        key: &quot;token_type_ids&quot;
+        value: &quot;tokenizer_token_type_ids&quot;
+      }
+</code></pre>
+<p>完整的配置目录如下：</p>
+<pre><code class="language-bash">├── emotion_content
+│   ├── 1
+│   └── config.pbtxt
+├── emotion_content_model
+│   ├── 1
+│   │   └── model.onnx
+│   └── config.pbtxt
+├── seqcls_postprocess
+│   ├── 1
+│   │   ├── model.py
+│   └── config.pbtxt
+└── tokenizer
+    ├── 1
+    │   ├── model.py
+    └── config.pbtxt
+</code></pre>
+<p>如果采用不同的模型，对应的分词器不同，需要注意tokenizer/1/model.py的python后端模型。</p>
+<h3 id="启动模型服务">启动模型服务</h3>
+<p><strong>启动tritonserver服务，需要制定当前的模型仓库。</strong></p>
+<pre><code class="language-bash">docker run --rm --gpus all -dit -p 9000:8000 \
+	-p 9001:8001 \
+	-p 9002:8002 \
+	--shm-size=&quot;10g&quot; \
+	--name emotion_words_hello \
+	-v /mnt/hdd1/model_repository:/models \
+	nvcr.io/nvidia/tritonserver:21.10-py3-base tritonserver --model-repository=/models
+</code></pre>
+<p>服务会默认启动3个端口，容器内容端口默认启动8000，8001，8002 分别是http调用、grpc调用和metrics接口。</p>
+<p>检查模型是否部署成功：</p>
+<pre><code class="language-bash">curl -v 172.16.7.108:8000/v2/health/ready
+
+*   Trying 172.16.7.108:8000...
+* Connected to 172.16.7.108 (172.16.7.108) port 8000 (#0)
+&gt; GET /v2/health/ready HTTP/1.1
+&gt; Host: 172.16.7.108:8000
+&gt; User-Agent: curl/7.82.0
+&gt; Accept: */*
+&gt;
+* Mark bundle as not supporting multiuse
+&lt; HTTP/1.1 200 OK
+&lt; Content-Length: 0
+&lt; Content-Type: text/plain
+&lt;
+* Connection #0 to host 172.16.7.108 left intact
+</code></pre>
+<h3 id="客户端调用">客户端调用</h3>
+<p>通过HTTP调用</p>
+<pre><code class="language-bash">POST 172.16.7.108:9000/v2/models/emotion_content/infer
+{
+  &quot;parameters&quot; : { &quot;sequence_id&quot; : 9 },
+  &quot;inputs&quot; : [
+    {
+      &quot;name&quot; : &quot;INPUT&quot;,
+      &quot;shape&quot; : [2, 1 ],
+      &quot;datatype&quot; : &quot;BYTES&quot;,
+      &quot;data&quot; : [&quot;黑苦荞茶的功效与作用及食用方法&quot;,&quot;阿迪达斯&quot;]
+    }
+  ]
+}
+</code></pre>
+<p>通过GRPC客户端调用</p>
+<p><a href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/applications/text_classification/multi_class/deploy/triton_serving/seqcls_grpc_client.py">https://github.com/PaddlePaddle/PaddleNLP/blob/develop/applications/text_classification/multi_class/deploy/triton_serving/seqcls_grpc_client.py</a></p>
+<h3 id="常用api汇总">常用API汇总</h3>
+<p>模型的状态是部署成功</p>
+<pre><code class="language-bash">curl -v 172.16.7.108:8000/v2/health/ready
+</code></pre>
+<p>获取模型的配置文件</p>
+<pre><code class="language-bash">curl -v 172.16.7.108:8000/v2/models/&lt;model name&gt;/config
+</code></pre>
+<p>postman测试模型推理</p>
+<pre><code class="language-bash"># POST ip:post/v2/models/&lt;model name&gt;/infer
+
+POST 172.16.7.108:9000/v2/models/emotion_content/infer
+{
+  &quot;parameters&quot; : { &quot;sequence_id&quot; : 9 },
+  &quot;inputs&quot; : [
+    {
+      &quot;name&quot; : &quot;INPUT&quot;,
+      &quot;shape&quot; : [2, 1 ],
+      &quot;datatype&quot; : &quot;BYTES&quot;,
+      &quot;data&quot; : [&quot;黑苦荞茶的功效与作用及食用方法&quot;,&quot;阿迪达斯&quot;]
+    }
+  ]
+}
+</code></pre>
+<p>获取模型的推理metrics，详细输出见文档最后</p>
+<pre><code class="language-bash">curl ip:port/metrics
+</code></pre>
+<h2 id="三-架构">三、架构</h2>
+<figure data-type="image" tabindex="1"><img src="https://cjblog.github.io/post-images/1701253032057.png" alt="" loading="lazy"></figure>
+<h2 id="四-支持后端">四、支持后端</h2>
+<p>NVIDIA Triton推理服务器为在CPU和GPU上部署深度学习模型提供了完整的解决方案，支持各种框架和模型执行后端，包括PyTorch、TensorFlow、ONNX、TensorRT等。从21.06.1版本开始，为了补充NVIDIA Triton推理服务器现有的深度学习功能，新的森林推理库（FIL）后端支持树模型，如XGBoost、LightGBM、Scikit-LearnRandom Forest、RAPIDS cuML随机森林和Treelite支持的任何其他模型。</p>
+<h3 id="tensorrt模型">TensorRT模型</h3>
+<pre><code class="language-bash">platform: &quot;tensorrt_plan&quot;
+  max_batch_size: 8
+  input [
+    {
+      name: &quot;input0&quot;
+      data_type: TYPE_FP32
+      dims: [ 16 ]
+    },
+    {
+      name: &quot;input1&quot;
+      data_type: TYPE_FP32
+      dims: [ 16 ]
+    }
+  ]
+  output [
+    {
+      name: &quot;output0&quot;
+      data_type: TYPE_FP32
+      dims: [ 16 ]
+    }
+  ]
+</code></pre>
+<h3 id="onnx模型">ONNX模型</h3>
+<pre><code class="language-bash">platform: &quot;onnxruntime_onnx&quot;
+max_batch_size: 1024
+input [
+    {
+      name: &quot;input_ids&quot;
+      data_type: TYPE_INT64
+      dims: [ -1 ]
+    },
+    {
+      name: &quot;token_type_ids&quot;
+      data_type: TYPE_INT64
+      dims: [ -1 ]
+    }
+]
+output [
+    {
+      name: &quot;linear_75.tmp_1&quot;
+      data_type: TYPE_FP32
+      dims: [ 2 ]
+    }
+]
+</code></pre>
+<p>TorchScript模型</p>
+<pre><code class="language-bash">name: &quot;tokenizer&quot;
+backend: &quot;python&quot;
+max_batch_size: 1024
+
+input [
+  {
+    name: &quot;INPUT_0&quot;
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
+
+output [
+  {
+    name: &quot;OUTPUT_0&quot;
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  },
+  {
+    name: &quot;OUTPUT_1&quot;
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  }
+]
+</code></pre>
+<p>TensorFlow模型</p>
+<p>OpenVINO模型</p>
+<h3 id="python模型">Python模型</h3>
+<pre><code class="language-bash">name: &quot;tokenizer&quot;
+backend: &quot;python&quot;
+max_batch_size: 1024
+
+input [
+  {
+    name: &quot;INPUT_0&quot;
+    data_type: TYPE_STRING
+    dims: [ 1 ]
+  }
+]
+
+output [
+  {
+    name: &quot;OUTPUT_0&quot;
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  },
+  {
+    name: &quot;OUTPUT_1&quot;
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  }
+]
+</code></pre>
+<p>DALI模型</p>
+<h3 id="集成树模型">集成树模型</h3>
+<p>XGBoost、Scikit-Learn RandomForest、LightGBM等模型部署，下面是部署案例</p>
+<p><a href="https://developer.nvidia.cn/blog/real-time-serving-for-xgboost-scikit-learn-randomforest-lightgbm-and-more/">Real-time Serving for XGBoost, Scikit-Learn RandomForest, LightGBM, and More | NVIDIA Technical Blog</a></p>
+<h2 id="五-模型配置">五、模型配置</h2>
+<h3 id="配置获取">配置获取</h3>
+<p>最小模型配置必须指定平台和/或后端属性、max_batch_size属性以及模型的输入和输出张量。模型部署以后可以通过HTTP接口访问模型的配置。</p>
+<pre><code class="language-bash">$ curl localhost:8000/v2/models/&lt;model name&gt;/config
+</code></pre>
+<h3 id="cpu模型实例">CPU模型实例</h3>
+<pre><code class="language-bash">instance_group [
+    {
+      count: 2
+      kind: KIND_CPU
+    }
+  ]
+</code></pre>
+<h3 id="版本策略">版本策略</h3>
+<p>每个模型可以有一个或多个版本。模型配置的ModelVersionPolicy属性用于设置以下策略之一。</p>
+<ul>
+<li>全部：模型存储库中可用的模型的所有版本都可以进行推断。version_policy: { all: {}}</li>
+<li>最新：存储库中只有最新的“n”版本的模型可用于推断。该模型的最新版本是数字最大的版本号。version_policy: { latest: { num_versions: 2}}</li>
+<li>具体：只有特定列出的模型版本可供推断。version_policy: { specific: { versions: [1,3]}}</li>
+</ul>
+<h3 id="实例组">实例组</h3>
+<p>默认情况下，为系统中可用的每个GPU创建模型的单个执行实例。实例组设置可用于在每个GPU或仅在某些GPU上放置一个模型的多个执行实例。例如，以下配置将在每个系统GPU上放置两个模型执行实例。</p>
+<pre><code class="language-bash">instance_group [
+    {
+      count: 2
+      kind: KIND_GPU
+    }
+  ]
+</code></pre>
+<p>以下配置将在GPU 0上放置一个执行实例，在GPU 1和2上放置两个执行实例。</p>
+<pre><code class="language-bash">instance_group [
+    {
+      count: 1
+      kind: KIND_GPU
+      gpus: [ 0 ]
+    },
+    {
+      count: 2
+      kind: KIND_GPU
+      gpus: [ 1, 2 ]
+    }
+  ]
+</code></pre>
+<h2 id="六-模型测试与分析">六、模型测试与分析</h2>
+<p>triton server部署的模型，官方提供的测试工具perf_analyzer，工具已经配置好在算法服务器容器，每次启动容器，即可测试模型推理性能。</p>
+<pre><code class="language-bash">docker run --gpus all \
+    --rm -it --net host nvcr.io/nvidia/tritonserver:23.02-py3-sdk
+</code></pre>
+<p>测试命令：</p>
+<pre><code class="language-bash"># -m 模型名称 -x 模型版本 -u 模型http地址 -b batch size -p 测试窗口时间
+# 更多参数自行参考help文档
+
+perf_analyzer -m emotion_content \
+      -x 1 \
+      -u 172.16.7.108:8000 \
+      -b 16 \
+      -p 5000 \
+      --percentile 95 \
+      --concurrency-range 1:8
+</code></pre>
+<p>测试发文通用情感词案例：</p>
+<figure data-type="image" tabindex="2"><img src="https://cjblog.github.io/post-images/1701253061900.png" alt="" loading="lazy"></figure>
+<h2 id="七-优化">七、优化</h2>
+<h3 id="模型实例">模型实例</h3>
+<p>通过增加模型实例来提升模型的吞吐量</p>
+<pre><code class="language-bash">instance_group [
+    {
+      count: 2
+      kind: KIND_GPU
+    }
+  ]
+</code></pre>
+<p>具体提升效果需要通过测试工具</p>
+<h3 id="动态批处理">动态批处理</h3>
+<p>动态批处理机将单个推理请求组合成一个更大的批次，通常比独立执行单个请求更高效地执行。要启用动态batcher停止Triton，请在模型配置文件的末尾添加以下行，然后重新启动Triton</p>
+<pre><code class="language-bash">dynamic_batching { }
+</code></pre>
+<h3 id="onnx与tensorrt优化">ONNX与TensorRT优化</h3>
+<p>一个特别强大的优化是将TensorRT与ONNX模型结合使用。作为应用于ONNX模型的TensorRT优化示例，作为基线，我们使用perf_analyzer使用不启用任何性能优化的基本模型配置来确定模型的性能</p>
+<pre><code class="language-bash">optimization { execution_accelerators {
+  gpu_execution_accelerator : [ {
+    name : &quot;tensorrt&quot;
+    parameters { key: &quot;precision_mode&quot; value: &quot;FP16&quot; }
+    parameters { key: &quot;max_workspace_size_bytes&quot; value: &quot;1073741824&quot; }
+    }]
+}}
+</code></pre>
+<p>TensorRT优化提供了2倍的吞吐量改进，同时将延迟减少了一半。TensorRT提供的好处将因型号而异，但一般来说，它可以提供显著的性能改进。</p>
+<p>更多优化配置参考：</p>
+<p><a href="https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/optimization.html">Optimization — NVIDIA Triton Inference Server</a></p>
+<h2 id="八-运行指标metrics">八、运行指标metrics</h2>
+<p>Triton提供Prometheus 指标，监控GPU和请求统计数据。默认情况下，这些指标可在http://localhost:8002/metrics上获得。这些指标仅通过访问端点可用，不会推送或发布到任何远程服务器。公制格式是纯文本，因此您可以直接查看它们，例如：</p>
+<pre><code class="language-bash">GET http://172.18.193.164:8002/metrics
+
+# HELP nv_inference_request_success Number of successful inference requests, all batch sizes
+# TYPE nv_inference_request_success counter
+nv_inference_request_success{model=&quot;seqcls_yingxiao&quot;,version=&quot;1&quot;} 619087.000000
+nv_inference_request_success{model=&quot;tokenizer&quot;,version=&quot;1&quot;} 619087.000000
+nv_inference_request_success{model=&quot;seqcls_postprocess_yingxiao&quot;,version=&quot;1&quot;} 619087.000000
+nv_inference_request_success{model=&quot;seqcls_model_yingxiao&quot;,version=&quot;1&quot;} 619087.000000
+# HELP nv_inference_request_failure Number of failed inference requests, all batch sizes
+# TYPE nv_inference_request_failure counter
+nv_inference_request_failure{model=&quot;seqcls_yingxiao&quot;,version=&quot;1&quot;} 1.000000
+nv_inference_request_failure{model=&quot;tokenizer&quot;,version=&quot;1&quot;} 0.000000
+nv_inference_request_failure{model=&quot;seqcls_postprocess_yingxiao&quot;,version=&quot;1&quot;} 0.000000
+nv_inference_request_failure{model=&quot;seqcls_model_yingxiao&quot;,version=&quot;1&quot;} 0.000000
+# HELP nv_inference_count Number of inferences performed
+......
+</code></pre>
+<p>包括推理请求指标，GPU指标，CPU指标，响应缓存指标等，具体含义参考</p>
+<p><a href="https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html">Metrics — NVIDIA Triton Inference Server</a></p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%B8%80-%E6%A6%82%E8%BF%B0">一、概述</a></li>
+<li><a href="#%E4%BA%8C-%E5%BF%AB%E9%80%9F%E9%83%A8%E7%BD%B2">二、快速部署</a>
+<ul>
+<li><a href="#%E5%87%86%E5%A4%87tritonserver%E7%9A%84%E9%95%9C%E5%83%8F">准备tritonserver的镜像</a></li>
+<li><a href="#%E5%AE%8C%E6%88%90%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">完成配置文件</a></li>
+<li><a href="#%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1">启动模型服务</a></li>
+<li><a href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8">客户端调用</a></li>
+<li><a href="#%E5%B8%B8%E7%94%A8api%E6%B1%87%E6%80%BB">常用API汇总</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%89-%E6%9E%B6%E6%9E%84">三、架构</a></li>
+<li><a href="#%E5%9B%9B-%E6%94%AF%E6%8C%81%E5%90%8E%E7%AB%AF">四、支持后端</a>
+<ul>
+<li><a href="#tensorrt%E6%A8%A1%E5%9E%8B">TensorRT模型</a></li>
+<li><a href="#onnx%E6%A8%A1%E5%9E%8B">ONNX模型</a></li>
+<li><a href="#python%E6%A8%A1%E5%9E%8B">Python模型</a></li>
+<li><a href="#%E9%9B%86%E6%88%90%E6%A0%91%E6%A8%A1%E5%9E%8B">集成树模型</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%94-%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE">五、模型配置</a>
+<ul>
+<li><a href="#%E9%85%8D%E7%BD%AE%E8%8E%B7%E5%8F%96">配置获取</a></li>
+<li><a href="#cpu%E6%A8%A1%E5%9E%8B%E5%AE%9E%E4%BE%8B">CPU模型实例</a></li>
+<li><a href="#%E7%89%88%E6%9C%AC%E7%AD%96%E7%95%A5">版本策略</a></li>
+<li><a href="#%E5%AE%9E%E4%BE%8B%E7%BB%84">实例组</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%AD-%E6%A8%A1%E5%9E%8B%E6%B5%8B%E8%AF%95%E4%B8%8E%E5%88%86%E6%9E%90">六、模型测试与分析</a></li>
+<li><a href="#%E4%B8%83-%E4%BC%98%E5%8C%96">七、优化</a>
+<ul>
+<li><a href="#%E6%A8%A1%E5%9E%8B%E5%AE%9E%E4%BE%8B">模型实例</a></li>
+<li><a href="#%E5%8A%A8%E6%80%81%E6%89%B9%E5%A4%84%E7%90%86">动态批处理</a></li>
+<li><a href="#onnx%E4%B8%8Etensorrt%E4%BC%98%E5%8C%96">ONNX与TensorRT优化</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%AB-%E8%BF%90%E8%A1%8C%E6%8C%87%E6%A0%87metrics">八、运行指标metrics</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://cjblog.github.io/post/bo-ke-ban-jia/">
+              <h3 class="post-title">
+                博客搬家
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://cjblog.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
