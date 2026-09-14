@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatDate } from '../lib/date';
+import { sortPostsByDateDesc } from '../lib/sort';
+
+/**
+ * 404 页。Astro 会把 src/pages/404.astro 构建成 dist/404.html，
+ * GitHub Pages 在静态站点下会自动用它响应找不到的地址。
+ * 本地预览也走它（scripts/serve-dist.mjs 里显式回落到 404.html）。
+ */
+
+// 死胡同不如给几条出路：把最近的文章列出来
+const recent = sortPostsByDateDesc(await getCollection('posts')).slice(0, 4);
+---
+
+<BaseLayout title="找不到这个地址" description="这个地址在站点上没有对应的内容。">
+  <article class="detail notfound">
+    <p class="notfound__code">404</p>
+
+    <h1 class="notfound__title">这个地址没有内容</h1>
+
+    <p class="page__lead">
+      你打开的链接在站点上不存在。可能是拼写有误，也可能是这篇文章已经改名或删掉了。
+    </p>
+
+    <nav class="notfound__actions" aria-label="站内入口">
+      <a class="notfound__action" href="/">去看项目</a>
+      <a class="notfound__action" href="/#posts">去看技术文章</a>
+    </nav>
+
+    {
+      recent.length > 0 && (
+        <section class="notfound__recent">
+          <h2 class="rail__heading">最近发布</h2>
+          <ul class="post-list">
+            {recent.map((entry) => (
+              <li class="post-item">
+                <h3 class="post-item__title">
+                  <a href={`/posts/${entry.id}/`}>{entry.data.title}</a>
+                </h3>
+                <p class="post-item__meta">
+                  <span>
+                    <span class="post-meta__value">{formatDate(entry.data.date)}</span> 发布
+                  </span>
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

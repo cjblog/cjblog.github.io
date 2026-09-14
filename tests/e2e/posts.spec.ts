@@ -1,86 +1,101 @@
 import { expect, test } from '@playwright/test';
 
+/**
+ * 这个文件里的断言刻意不依赖具体是哪几篇文章。
+ *
+ * 之前的版本把样例文章的标题和日期写死在断言里，结果每加一篇文章就会挂一批
+ * 用例——测的是「当时的样例快照」而不是「两栏布局该有的行为」。现在改成断言
+ * 不变量：倒序、字段格式、置顶不重复、错误不泄漏。这类断言的内容无关。
+ *
+ * 摘要分割（`<!-- more -->`）的语义由 tests/unit/excerpt.test.ts 覆盖，
+ * 那里能用构造好的输入精确验证，比依赖某篇真实文章稳。
+ */
 test.describe('技术文章两栏', () => {
-  test('左栏按发布时间倒序，且不含置顶文章', async ({ page }) => {
+  test('左栏按发布时间倒序', async ({ page }) => {
     await page.goto('/#posts');
 
-    const titles = await page
-      .locator('#posts .post-item__title')
-      .allTextContents();
+    const metas = await page.locator('#posts .post-item__meta').allTextContents();
+    const dates = metas.map((text) => text.match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? '');
 
-    // 置顶的《Markdown 渲染效果演示》(09-01) 不在这里出现
-    expect(titles.map((title) => title.trim())).toEqual([
-      '字数统计与摘要截取是怎么算的', // 2026-09-10
-      '为什么公式要在构建期渲染', // 2026-09-05
-    ]);
+    expect(dates.length).toBeGreaterThan(1);
+    expect(dates.every((date) => /^\d{4}-\d{2}-\d{2}$/.test(date))).toBe(true);
+    expect(dates).toEqual([...dates].sort().reverse());
   });
 
-  test('右栏只放置顶文章', async ({ page }) => {
+  test('右栏有置顶文章，且左栏不重复出现', async ({ page }) => {
     await page.goto('/#posts');
 
-    const rail = await page.locator('.rail__item').allTextContents();
+    // 右栏链接的文本节点是标题，日期在单独的 .rail__date 里
+    const railTitles = await page
+      .locator('.rail__item a')
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.childNodes[0]?.textContent?.trim() ?? ''),
+      );
+    const columnTitles = (await page.locator('#posts .post-item__title a').allTextContents()).map(
+      (title) => title.trim(),
+    );
 
-    expect(rail).toHaveLength(1);
-    expect(rail[0]).toContain('Markdown 渲染效果演示');
-  });
+    expect(railTitles.length).toBeGreaterThan(0);
+    expect(railTitles.every((title) => title.length > 0)).toBe(true);
 
-  test('置顶文章在左栏不重复出现', async ({ page }) => {
-    await page.goto('/#posts');
-
-    const title = 'Markdown 渲染效果演示';
-    await expect(page.locator('#posts .post-item__title', { hasText: title })).toHaveCount(0);
-    await expect(page.locator('.rail__item', { hasText: title })).toHaveCount(1);
+    for (const title of railTitles) {
+      expect(columnTitles, `置顶的《${title}》不该同时出现在左栏`).not.toContain(title);
+    }
   });
 
   test('列表项显示发布时间、字数、更新时间与阅读时长', async ({ page }) => {
     await page.goto('/#posts');
 
-    const meta = page.locator('#posts .post-item').first().locator('.post-item__meta');
-
-    await expect(meta).toContainText('2026-09-10');
-    await expect(meta).toContainText('发布');
-    await expect(meta).toContainText('字');
-    await expect(meta).toContainText('更新于');
-    await expect(meta).toContainText('2026-09-12');
-    await expect(meta).toContainText('阅读');
-    await expect(meta).toContainText(/约 \d+ 分钟/);
+    // 断言字段格式而非具体数值——加了新文章也不该影响这条
+    for (const meta of await page.locator('#posts .post-item__meta').all()) {
+      await expect(meta).toHaveText(/\d{4}-\d{2}-\d{2}\s*发布/);
+      await expect(meta).toHaveText(/[\d,]+ 字/);
+      await expect(meta).toHaveText(/更新于 \d{4}-\d{2}-\d{2}/);
+      await expect(meta).toHaveText(/阅读 约 \d+ 分钟/);
+    }
   });
 
-  test('字数不是 0，说明正文确实被统计了', async ({ page }) => {
+  test('字数统计确实算出了正文的量', async ({ page }) => {
     await page.goto('/#posts');
 
-    const text = (await page.locator('#posts .post-item__meta').first().textContent()) ?? '';
-    const wordCount = Number(text.match(/([\d,]+) 字/)?.[1].replace(/,/g, ''));
+    const metas = await page.locator('#posts .post-item__meta').allTextContents();
+    const counts = metas.map((text) => Number(text.match(/([\d,]+) 字/)?.[1].replace(/,/g, '')));
 
-    expect(wordCount).toBeGreaterThan(100);
+    expect(counts.length).toBeGreaterThan(0);
+    for (const count of counts) {
+      // 0 字说明正文没被读到；样例文章都远超 100 字
+      expect(count).toBeGreaterThan(100);
+    }
   });
 
-  test('列表项显示摘要，且摘要里没有公式残留', async ({ page }) => {
+  test('列表摘要不为空，且没有漏出公式、HTML 或分割标记', async ({ page }) => {
     await page.goto('/#posts');
 
-    const excerpt = page.locator('#posts .post-item__excerpt').first();
-    await expect(excerpt).toBeVisible();
-    await expect(excerpt).not.toContainText('$');
-    await expect(excerpt).not.toContainText('katex');
-  });
+    const excerpts = await page.locator('#posts .post-item__excerpt').allTextContents();
+    expect(excerpts.length).toBeGreaterThan(0);
 
-  test('摘要按 <!-- more --> 分割，不含标记之后的内容', async ({ page }) => {
-    await page.goto('/#posts');
-
-    // reading-time-and-excerpt 的 more 标记之后是「## 字数为什么不能只按空格切」
-    const excerpt = page.locator('#posts .post-item__excerpt').first();
-    await expect(excerpt).toContainText('字数');
-    await expect(excerpt).not.toContainText('字数为什么不能只按空格切');
+    for (const text of excerpts) {
+      expect(text.trim().length).toBeGreaterThan(0);
+      expect(text).not.toContain('$');
+      expect(text).not.toContain('katex');
+      expect(text).not.toContain('<!--');
+      expect(text).not.toContain('<');
+    }
   });
 });
 
 test.describe('文章全文页', () => {
-  test('点击标题进入全文', async ({ page }) => {
+  test('点击标题进入的就是那篇文章的全文', async ({ page }) => {
     await page.goto('/#posts');
-    await page.locator('#posts .post-item__title a').first().click();
 
-    await expect(page).toHaveURL(/\/posts\/reading-time-and-excerpt\/$/);
-    await expect(page.locator('.detail__title')).toHaveText('字数统计与摘要截取是怎么算的');
+    const link = page.locator('#posts .post-item__title a').first();
+    const title = (await link.textContent())?.trim();
+    expect(title).toBeTruthy();
+
+    await link.click();
+
+    await expect(page).toHaveURL(/\/posts\/[^/]+\/$/);
+    await expect(page.locator('.detail__title')).toHaveText(title as string);
   });
 
   test('全文页把行内公式渲染成 KaTeX，而不是漏出 LaTeX 原文', async ({ page }) => {

@@ -662,6 +662,65 @@ main:has(.module--posts:target) .module--projects {
 }
 
 /* ==========================================================================
+   404
+   死胡同不如给出路：说清楚发生了什么，并给两三条能走的路。
+   ========================================================================== */
+
+.notfound__code {
+  font-family: var(--font-prose);
+  font-size: clamp(4rem, 14vw, 7rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0 0 var(--space-3);
+  color: color-mix(in srgb, var(--accent) 22%, #fff);
+}
+
+.notfound__title {
+  font-family: var(--font-prose);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.01em;
+}
+
+.notfound__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.notfound__action {
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--surface);
+  color: var(--accent-deep);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  transition: transform 200ms var(--ease-bounce), border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.notfound__action:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 8px 16px -10px rgba(27, 92, 158, 0.3);
+}
+
+.notfound__recent {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line);
+}
+
+.notfound__recent .post-item__title {
+  font-size: var(--text-base);
+}
+
+/* ==========================================================================
    正文排版
    ========================================================================== */
 

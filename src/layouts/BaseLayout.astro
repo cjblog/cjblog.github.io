@@ -21,7 +21,7 @@ interface Props {
   active?: ModuleId;
 }
 
-const { title, description = SITE.description, active = 'projects' } = Astro.props;
+const { title, description = SITE.description, active } = Astro.props;
 
 const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, SITE.url).href;

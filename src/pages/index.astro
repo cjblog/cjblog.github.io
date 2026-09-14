@@ -14,7 +14,7 @@ const pinned = selectPinnedPosts(posts);
 const latest = posts.filter((post) => !post.data.pinned);
 ---
 
-<BaseLayout>
+<BaseLayout active="projects">
   {/*
     两个模块都渲染进 HTML，靠 CSS 的 :target 切换。这样禁用 JS 时
     「技术文章」依然可达、内容也依然在文档里；JS 只负责同步导航高亮。
