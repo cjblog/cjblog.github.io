@@ -1,0 +1,53 @@
+---
+import { getCollection, render } from 'astro:content';
+import 'katex/dist/katex.min.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PriceBadge from '../../components/PriceBadge.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const price = entry.data.price;
+const priceNote =
+  price.type === 'paid' ? '购买后含一年更新' : price.type === 'limited-free' ? '限时免费，之后会收费' : null;
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.summary}
+  active="projects"
+>
+  <article class="detail">
+    <a class="detail__back" href="/">返回项目浏览</a>
+
+    <header class="detail__header">
+      <h1 class="detail__title">{entry.data.title}</h1>
+      <p class="page__lead">{entry.data.summary}</p>
+
+      <div class="detail__facts">
+        <PriceBadge price={price} />
+        <ul class="detail__tags">
+          {entry.data.tech.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+
+      {
+        entry.data.link && (
+          <p class="detail__link">
+            <a href={entry.data.link}>项目地址</a>
+          </p>
+        )
+      }
+      {priceNote && <p class="detail__note">{priceNote}</p>}
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

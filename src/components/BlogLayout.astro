@@ -1,0 +1,55 @@
+---
+import PostListItem from './PostListItem.astro';
+import { formatDate } from '../lib/date';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  /** 左栏：按发布时间倒序的最新文章（不含置顶） */
+  latest: CollectionEntry<'posts'>[];
+  /** 右栏：置顶文章 */
+  pinned: CollectionEntry<'posts'>[];
+}
+
+const { latest, pinned } = Astro.props;
+---
+
+<div class="blog-layout">
+  <div>
+    {
+      latest.length > 0 ? (
+        <ul class="post-list">
+          {latest.map((entry) => (
+            <PostListItem slug={entry.id} data={entry.data} body={entry.body ?? ''} />
+          ))}
+        </ul>
+      ) : (
+        <p class="empty-note">
+          还没有文章。在 <code>drafts/posts/</code> 下新建一个 markdown 文件，
+          跑一次 <code>npm run sync</code> 就会出现。
+        </p>
+      )
+    }
+  </div>
+
+  <aside class="rail" aria-labelledby="rail-heading">
+    <h2 class="rail__heading" id="rail-heading">置顶文章</h2>
+    {
+      pinned.length > 0 ? (
+        <ul class="rail__list">
+          {pinned.map((entry) => (
+            <li class="rail__item">
+              <a href={`/posts/${entry.id}/`}>
+                {entry.data.title}
+                <span class="rail__date">{formatDate(entry.data.date)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty-note">
+          还没有置顶文章。在文章 frontmatter 里写 <code>pinned: true</code> 即可。
+        </p>
+      )
+    }
+  </aside>
+</div>

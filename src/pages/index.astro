@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BlogLayout from '../components/BlogLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { selectPinnedPosts, sortPostsByDateDesc, sortProjects } from '../lib/sort';
+
+const projects = sortProjects(await getCollection('projects'));
+const posts = sortPostsByDateDesc(await getCollection('posts'));
+const pinned = selectPinnedPosts(posts);
+// 置顶文章只在右栏出现，左栏不重复。
+// 注意取的是 entry.data.pinned —— 内容挂在 data 下，写成 entry.pinned 会恒为 undefined，
+// 过滤静默失效、置顶文章跑进左栏。这条由 e2e 兜底。
+const latest = posts.filter((post) => !post.data.pinned);
+---
+
+<BaseLayout>
+  {/*
+    两个模块都渲染进 HTML，靠 CSS 的 :target 切换。这样禁用 JS 时
+    「技术文章」依然可达、内容也依然在文档里；JS 只负责同步导航高亮。
+  */}
+  <section id="projects" class="module module--projects">
+    <div class="page__intro">
+      <h1 class="page__title">项目</h1>
+      <p class="page__lead">
+        做着玩的和认真做的都在这里。点开卡片可以看详细介绍。
+      </p>
+    </div>
+
+    {
+      projects.length > 0 ? (
+        <div class="card-grid">
+          {projects.map((entry) => (
+            <ProjectCard slug={entry.id} data={entry.data} />
+          ))}
+        </div>
+      ) : (
+        <p class="empty-note">
+          还没有项目。在 <code>drafts/projects/</code> 下新建一个 markdown 文件，
+          跑一次 <code>npm run sync</code> 就会出现。
+        </p>
+      )
+    }
+  </section>
+
+  <section id="posts" class="module module--posts">
+    <div class="page__intro">
+      <h1 class="page__title">技术文章</h1>
+      <p class="page__lead">
+        算法、大模型与工程实践。左边是最新发布的，右边是几篇还算能看的。
+      </p>
+    </div>
+
+    <BlogLayout latest={latest} pinned={pinned} />
+  </section>
+</BaseLayout>
+
+<script>
+  // CSS 的 :target 负责真正的模块切换，这里只让导航高亮跟着走。
+  const links = document.querySelectorAll<HTMLElement>('[data-module]');
+
+  function syncNav(): void {
+    // 模块的实际切换由 CSS 的 :target 完成，这里只同步导航高亮。
+    // 不要把当前模块写回 <html> 的 data-module —— 导航链接也用这个属性名，
+    // 会被 [data-module="..."] 选择器同时匹配到，且在 CSS 里没有任何消费方。
+    const active = location.hash === '#posts' ? 'posts' : 'projects';
+    links.forEach((link) => {
+      if (link.dataset.module === active) {
+        link.setAttribute('aria-current', 'true');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  syncNav();
+  window.addEventListener('hashchange', syncNav);
+</script>

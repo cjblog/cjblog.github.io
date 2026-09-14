@@ -1,0 +1,851 @@
+/* ==========================================================================
+   设计令牌
+   底色是极浅的蓝白，不是米白也不是纯白；墨色是深海军蓝，不是近黑。
+   浅蓝是"地"不是"装饰"——饱和度只留给交互态与价格标签。
+   ========================================================================== */
+
+:root {
+  --paper: #f7fbff;
+  --paper-deep: #eef6ff;
+  --surface: #ffffff;
+
+  --ink: #0f2438;
+  --ink-muted: #5b7590;
+  --ink-faint: #8ba7c0;
+
+  --line: #dce9f6;
+  --line-strong: #bcd6ee;
+
+  --accent: #2f7fd1;
+  --accent-deep: #1b5c9e;
+  --accent-wash: #e9f3fd;
+
+  --radius-card: 14px;
+  --radius-block: 10px;
+  --radius-pill: 999px;
+
+  /* 层级化的间距，避免各处随手写数值 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --page-width: 1120px;
+  --blog-width: 1080px;
+  /* 约 40 个汉字一行，中文正文的舒适区 */
+  --measure: 42rem;
+
+  --font-ui: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-prose: 'Spectral', Georgia, 'Songti SC', 'SimSun', 'PingFang SC',
+    'Microsoft YaHei', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.375rem;
+
+  /* 带轻微回弹的缓动，hover 的"跳动感"来自这里 */
+  --ease-bounce: cubic-bezier(0.34, 1.42, 0.64, 1);
+}
+
+/* ==========================================================================
+   基础
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--accent-deep);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-block);
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: var(--space-4);
+  top: var(--space-4);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   背景：散落的公式
+   这是整个页面唯一的"张扬"之处，其余部分保持安静。
+   位置写死在数组里而不是随机——随机会让每次构建产物都不同。
+   ========================================================================== */
+
+.formula-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  /* 顶栏与页脚区间之外，避免文字压在导航上 */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+}
+
+.formula-bg span {
+  position: absolute;
+  font-family: var(--font-prose);
+  font-style: italic;
+  color: var(--accent-deep);
+  white-space: nowrap;
+  transform: rotate(var(--rotate, 0deg));
+  opacity: var(--opacity, 0.07);
+  font-size: var(--size, 1.4rem);
+  letter-spacing: 0.02em;
+}
+
+/* 窄屏上公式会和正文抢注意力，只留最淡的几条 */
+@media (max-width: 720px) {
+  .formula-bg span:nth-child(n + 5) {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   页头与导航
+   ========================================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header__inner {
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.site-title {
+  font-family: var(--font-prose);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.site-title:hover {
+  color: var(--accent-deep);
+}
+
+.site-nav {
+  display: flex;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.site-nav__link {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.site-nav__link:hover {
+  background-color: var(--accent-wash);
+  color: var(--accent-deep);
+}
+
+.site-nav__link[aria-current='true'] {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+/* ==========================================================================
+   页面容器
+   ========================================================================== */
+
+.page {
+  position: relative;
+  z-index: 1; /* 压在公式背景之上 */
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding: var(--space-7) var(--space-5) var(--space-8);
+}
+
+.page__intro {
+  max-width: 44rem;
+  margin-bottom: var(--space-7);
+}
+
+.page__title {
+  font-family: var(--font-prose);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.01em;
+}
+
+.page__lead {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-base);
+}
+
+/* 模块切换用 CSS 的 :target，不依赖 JS —— 禁用 JS 时「技术文章」依然可达，
+   内容也依然在文档里（对搜索引擎同样可见）。JS 只负责同步导航高亮。
+   用 :target 而不是 hidden 属性，切换发生在首次绘制之前，不会闪一下默认模块。 */
+.module {
+  display: none;
+}
+
+.module--projects {
+  display: block; /* 默认模块 */
+}
+
+.module:target {
+  display: block;
+}
+
+main:has(.module--posts:target) .module--projects {
+  display: none;
+}
+
+/* ==========================================================================
+   项目卡片
+   平时不投影，hover 才投影——阴影在这里承载"可点击"这个信息，不是装饰。
+   圆角也分层级：卡片 14px、内部块 10px、标签胶囊，不做成一套圆角用到底。
+   ========================================================================== */
+
+.card-grid {
+  display: grid;
+  /* 列数随视口自适应，无需 JS 断点 */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-5);
+  /* 同一行的卡片统一高度（Grid 默认 stretch）。
+     这里能安心拉齐的前提是每张卡片骨架一致：封面位永远存在、摘要截断到固定行数。
+     如果哪天又把封面改成「有就渲染、没有就留空」，拉齐就会让没封面的卡片
+     内部空出一大块 —— 要么保持骨架一致，要么回到 align-items: start。 */
+  align-items: stretch;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  color: inherit;
+  transition: transform 240ms var(--ease-bounce),
+    box-shadow 240ms ease, border-color 240ms ease;
+}
+
+/* 阴影只在 hover / 键盘聚焦时出现，它是"这里可以点"的信息，不是常驻装饰 */
+.card:hover,
+.card:has(.card__link:focus-visible) {
+  transform: translateY(-6px) scale(1.012);
+  border-color: var(--line-strong);
+  box-shadow: 0 14px 28px -14px rgba(27, 92, 158, 0.28),
+    0 3px 8px -4px rgba(27, 92, 158, 0.12);
+}
+
+/* 链接只包住标题，::after 把可点击区域铺满整张卡片。
+   这样读屏软件读到的链接名是标题本身，而不是整张卡片的内容。 */
+.card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+}
+
+.card__link:focus-visible {
+  outline: none; /* 焦点环画在整张卡片上，见下 */
+}
+
+.card:has(.card__link:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* 封面位永远存在，比例固定 —— 这是所有卡片等高、且内部不留空洞的前提 */
+.card__cover {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-block);
+  border: 1px solid var(--line);
+  background-color: var(--paper-deep);
+}
+
+/* 没写 cover 的项目用它顶上：浅蓝底 + 一个由 slug 决定的公式图案 */
+.card__cover--motif {
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  overflow: hidden;
+}
+
+.card__cover--motif span {
+  font-family: var(--font-prose);
+  font-style: italic;
+  font-size: 1.35rem;
+  text-align: center;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--accent) 62%, #fff);
+}
+
+.card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.card__title {
+  font-family: var(--font-prose);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* 摘要截断到 3 行。卡片要求统一尺寸，长短不一的摘要会让等高之后
+   在短的那几张里空出大块空白。完整内容在详情页，这里截断不影响信息完整性。 */
+.card__summary {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card__tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card__tech li {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  background-color: var(--paper-deep);
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.6rem;
+}
+
+.card__cta {
+  margin-top: auto;
+  font-size: var(--text-sm);
+  color: var(--accent-deep);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.card:hover .card__cta {
+  color: var(--accent);
+}
+
+/* 价格标签：颜色由 src/lib/pricing.ts 提供，通过 --price-color 注入，
+   样式仍然写在 CSS 里，色值不会散落到组件中。 */
+.price-badge {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  color: var(--price-color, var(--ink-muted));
+  background-color: color-mix(in srgb, var(--price-color, var(--ink-muted)) 12%, #fff);
+  border: 1px solid color-mix(in srgb, var(--price-color, var(--ink-muted)) 35%, #fff);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   技术文章：左最新 + 右置顶
+   ========================================================================== */
+
+.blog-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 19rem;
+  gap: var(--space-7);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .blog-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+.post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.post-item {
+  padding-block: var(--space-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.post-item:first-child {
+  padding-top: 0;
+}
+
+.post-item__title {
+  font-family: var(--font-prose);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 var(--space-2);
+}
+
+.post-item__title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.post-item__title a:hover {
+  color: var(--accent-deep);
+}
+
+/* 元信息用空格分组，不用中点分隔——"A · B · C" 是最典型的模板痕迹。
+   数值统一等宽数字，纵向对齐。 */
+.post-item__meta,
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-5);
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.post-meta__value {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+.post-item__excerpt {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  max-width: 46rem;
+}
+
+.rail {
+  position: sticky;
+  top: 5.5rem;
+}
+
+.rail__heading {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.rail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.rail__item a {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-block);
+  text-decoration: none;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  transition: transform 200ms var(--ease-bounce), border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.rail__item a:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 16px -10px rgba(27, 92, 158, 0.3);
+}
+
+.rail__date {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty-note {
+  padding: var(--space-6);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-block);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  background-color: var(--surface);
+}
+
+/* ==========================================================================
+   详情页
+   ========================================================================== */
+
+.detail {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+.detail__header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.detail__title {
+  font-family: var(--font-prose);
+  font-size: var(--text-3xl);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 0 0 var(--space-4);
+}
+
+.detail__back {
+  display: inline-block;
+  margin-bottom: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+
+.detail__back:hover {
+  color: var(--accent-deep);
+}
+
+.detail__facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.detail__link,
+.detail__note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+.detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.detail__header > .detail__tags {
+  margin-top: var(--space-4);
+}
+
+.detail__tags li {
+  font-size: var(--text-xs);
+  color: var(--accent-deep);
+  background-color: var(--accent-wash);
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.6rem;
+}
+
+/* ==========================================================================
+   正文排版
+   ========================================================================== */
+
+.prose {
+  font-family: var(--font-prose);
+  font-size: var(--text-base);
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.prose > * + * {
+  margin-top: var(--space-3);
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-2);
+}
+
+.prose h2 {
+  font-size: var(--text-xl);
+}
+
+.prose h3 {
+  font-size: var(--text-lg);
+}
+
+.prose h4 {
+  font-size: var(--text-base);
+}
+
+.prose p,
+.prose li {
+  margin-block: var(--space-2);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose li + li {
+  margin-top: var(--space-1);
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding: var(--space-3) var(--space-5);
+  border-left: 3px solid var(--line-strong);
+  background-color: var(--paper-deep);
+  border-radius: 0 var(--radius-block) var(--radius-block) 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.prose blockquote p {
+  margin-block: var(--space-1);
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin-block: var(--space-6);
+}
+
+.prose a {
+  text-decoration: underline;
+}
+
+.prose img {
+  display: block;
+  margin-inline: auto;
+  border-radius: var(--radius-block);
+  border: 1px solid var(--line);
+  background-color: var(--surface);
+}
+
+/* 表格：宽表在窄屏上横向滚动，而不是把页面撑破 */
+.prose .table-scroll {
+  overflow-x: auto;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--line);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  background-color: var(--accent-wash);
+  font-weight: 600;
+}
+
+.prose tbody tr:nth-child(even) {
+  background-color: var(--paper);
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background-color: var(--paper-deep);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+.prose pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.65;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-block);
+  overflow-x: auto;
+}
+
+.prose pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* 行间公式在窄屏上可能超宽，让它自己滚动 */
+.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: var(--space-3);
+}
+
+/* 任务列表 */
+.prose li:has(> input[type='checkbox']) {
+  list-style: none;
+  margin-left: -1.4em;
+}
+
+/* ==========================================================================
+   页脚
+   ========================================================================== */
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+  border-top: 1px solid var(--line);
+  color: var(--ink-faint);
+  font-size: var(--text-xs);
+}
+
+/* ==========================================================================
+   降低动效偏好
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* 关掉位移动画，保留颜色与阴影反馈，交互后果依然可见 */
+  .card:hover,
+  .rail__item a:hover {
+    transform: none;
+  }
+}

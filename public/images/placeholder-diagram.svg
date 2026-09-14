@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 240" role="img" aria-label="示例流程图">
+  <rect width="560" height="240" rx="12" fill="#f2f8fe"/>
+  <g stroke="#a9c9e8" stroke-width="2" fill="none">
+    <rect x="30" y="90" width="120" height="60" rx="8" fill="#ffffff"/>
+    <rect x="220" y="90" width="120" height="60" rx="8" fill="#ffffff"/>
+    <rect x="410" y="90" width="120" height="60" rx="8" fill="#ffffff"/>
+    <path d="M150 120h70M340 120h70" marker-end="url(#arrow)"/>
+  </g>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#a9c9e8"/>
+    </marker>
+  </defs>
+  <g fill="#3f6f9f" font-family="system-ui, sans-serif" font-size="17" text-anchor="middle">
+    <text x="90" y="125">原始文档</text>
+    <text x="280" y="125">切分与向量化</text>
+    <text x="470" y="125">检索结果</text>
+  </g>
+  <text x="280" y="40" fill="#6b93bb" font-family="system-ui, sans-serif" font-size="15" text-anchor="middle">示例插图，用于验证正文图片渲染</text>
+</svg>

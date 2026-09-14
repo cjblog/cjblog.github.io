@@ -1,0 +1,17 @@
+---
+import { resolvePriceBadge } from '../lib/pricing';
+import type { Price } from '../lib/schema';
+
+interface Props {
+  price: Price;
+}
+
+const { price } = Astro.props;
+// 颜色只有一个来源（src/lib/pricing.ts），这里以自定义属性注入，
+// 具体样式仍写在 CSS 里，色值不会散落到组件。
+const badge = resolvePriceBadge(price);
+---
+
+<span class={`price-badge ${badge.className}`} style={`--price-color: ${badge.color}`}>
+  {badge.label}
+</span>

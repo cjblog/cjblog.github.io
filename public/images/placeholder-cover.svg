@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="示例封面图">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8f2fd"/>
+      <stop offset="100%" stop-color="#cfe3fa"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <g fill="none" stroke="#7fb3e8" stroke-width="2" opacity="0.55">
+    <circle cx="150" cy="180" r="46"/>
+    <circle cx="300" cy="180" r="46"/>
+    <circle cx="450" cy="180" r="46"/>
+    <path d="M196 180h58M346 180h58"/>
+  </g>
+  <g fill="#4a7fb5" font-family="system-ui, sans-serif" font-size="20" text-anchor="middle">
+    <text x="150" y="187">输入</text>
+    <text x="300" y="187">检索</text>
+    <text x="450" y="187">生成</text>
+  </g>
+  <text x="320" y="70" fill="#3f6f9f" font-family="system-ui, sans-serif" font-size="26" font-weight="600" text-anchor="middle">示例封面图</text>
+  <text x="320" y="322" fill="#6b93bb" font-family="system-ui, sans-serif" font-size="16" text-anchor="middle">public/images/placeholder-cover.svg</text>
+</svg>

@@ -1,0 +1,39 @@
+---
+/**
+ * 背景里散落的公式 —— 整页唯一"张扬"的元素，其余部分保持安静。
+ *
+ * 用 Unicode 字符而不是 KaTeX 渲染：公式只是装饰，用 KaTeX 会让首页
+ * （本来不含任何公式）白白加载一整套数学字体与 CSS。
+ *
+ * 位置写死在数组里而不是随机生成：随机会让每次构建产出不同的 HTML，
+ * 产物不可复现，diff 也会变得无法阅读。
+ */
+const formulas = [
+  { tex: '∫₀^∞ e^(−x²) dx = √π⁄2', top: '13%', left: '3%', size: '1.35rem', rotate: '-7deg', opacity: 0.075 },
+  { tex: '∇·E = ρ⁄ε₀', top: '23%', left: '78%', size: '1.5rem', rotate: '5deg', opacity: 0.07 },
+  { tex: 'E = mc²', top: '38%', left: '6%', size: '1.6rem', rotate: '4deg', opacity: 0.065 },
+  { tex: 'iℏ ∂ψ⁄∂t = Ĥψ', top: '52%', left: '74%', size: '1.4rem', rotate: '-5deg', opacity: 0.07 },
+  { tex: 'H(X) = −Σ p(x) log p(x)', top: '66%', left: '4%', size: '1.3rem', rotate: '6deg', opacity: 0.07 },
+  { tex: 'e^(iπ) + 1 = 0', top: '78%', left: '70%', size: '1.45rem', rotate: '-4deg', opacity: 0.065 },
+  { tex: '∂²u⁄∂t² = c²∇²u', top: '88%', left: '12%', size: '1.35rem', rotate: '3deg', opacity: 0.06 },
+  { tex: 'softmax(zᵢ) = e^(zᵢ)⁄Σⱼ e^(zⱼ)', top: '46%', left: '40%', size: '1.25rem', rotate: '-3deg', opacity: 0.05 },
+];
+---
+
+<div class="formula-bg" aria-hidden="true">
+  {
+    formulas.map((formula) => (
+      <span
+        style={{
+          top: formula.top,
+          left: formula.left,
+          '--size': formula.size,
+          '--rotate': formula.rotate,
+          '--opacity': String(formula.opacity),
+        }}
+      >
+        {formula.tex}
+      </span>
+    ))
+  }
+</div>

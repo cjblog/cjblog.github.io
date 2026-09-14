@@ -1,0 +1,48 @@
+---
+import { getCollection, render } from 'astro:content';
+import 'katex/dist/katex.min.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, resolveUpdated } from '../../lib/date';
+import { readingStats } from '../../lib/reading-time';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const stats = readingStats(entry.body ?? '');
+const published = formatDate(entry.data.date);
+const updated = formatDate(resolveUpdated(entry.data.date, entry.data.updated));
+---
+
+<BaseLayout title={entry.data.title} active="posts">
+  <article class="detail">
+    <a class="detail__back" href="/#posts">返回技术文章</a>
+
+    <header class="detail__header">
+      <h1 class="detail__title">{entry.data.title}</h1>
+
+      <p class="post-meta">
+        <span><span class="post-meta__value">{published}</span> 发布</span>
+        <span><span class="post-meta__value">{stats.wordCount.toLocaleString('zh-CN')}</span> 字</span>
+        <span>更新于 <span class="post-meta__value">{updated}</span></span>
+        <span>阅读 <span class="post-meta__value">{stats.label}</span></span>
+      </p>
+
+      {
+        entry.data.tags.length > 0 && (
+          <ul class="detail__tags">
+            {entry.data.tags.map((tag) => <li>{tag}</li>)}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,55 @@
+---
+// 字体自托管（@fontsource），不依赖第三方 CDN —— 静态站不该因为
+// 外部字体服务抖动而闪一下无样式文字。中文回落系统字体，不加载巨型中文 Web 字体。
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/spectral/400.css';
+import '@fontsource/spectral/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '../styles/global.css';
+
+import FormulaBackground from '../components/FormulaBackground.astro';
+import SiteNav from '../components/SiteNav.astro';
+import { SITE } from '../lib/site';
+import type { ModuleId } from '../lib/site';
+
+interface Props {
+  /** 页面标题；会拼上站名 */
+  title?: string;
+  description?: string;
+  active?: ModuleId;
+}
+
+const { title, description = SITE.description, active = 'projects' } = Astro.props;
+
+const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, SITE.url).href;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+    <FormulaBackground />
+    <SiteNav active={active} />
+
+    <main id="main" class="page">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <p>© {new Date().getFullYear()} {SITE.title}　·　由 Astro 构建，托管于 GitHub Pages</p>
+    </footer>
+  </body>
+</html>

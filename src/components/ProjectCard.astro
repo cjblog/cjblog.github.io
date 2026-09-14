@@ -1,0 +1,71 @@
+---
+import PriceBadge from './PriceBadge.astro';
+import type { ProjectFrontmatter } from '../lib/schema';
+
+interface Props {
+  slug: string;
+  data: ProjectFrontmatter;
+}
+
+const { slug, data } = Astro.props;
+const href = `/projects/${slug}/`;
+
+/**
+ * 没写 cover 的项目用一个公式图案占位，而不是留空。
+ *
+ * 卡片要求统一尺寸（等高），而封面位是高度差异的最大来源：只让部分卡片有封面，
+ * 拉齐等高之后没封面的卡片内部就会空出一大块。让封面位永远存在、比例固定，
+ * 所有卡片的骨架才一致，拉齐之后才不会留下空洞。
+ *
+ * 图案由 slug 决定，不用随机——随机会让每次构建产物不同。
+ */
+const MOTIFS = ['∫₀^∞ e^(−x²) dx', '∇·E = ρ⁄ε₀', 'E = mc²', 'iℏ ∂ψ⁄∂t = Ĥψ'];
+
+function motifFor(value: string): string {
+  let hash = 0;
+  for (const char of value) {
+    hash = (hash * 31 + (char.codePointAt(0) ?? 0)) >>> 0;
+  }
+  return MOTIFS[hash % MOTIFS.length];
+}
+
+const motif = motifFor(slug);
+---
+
+<article class="card">
+  {
+    data.cover ? (
+      <img
+        class="card__cover"
+        src={data.cover}
+        alt=""
+        width="640"
+        height="360"
+        loading="lazy"
+      />
+    ) : (
+      <div class="card__cover card__cover--motif" aria-hidden="true">
+        <span>{motif}</span>
+      </div>
+    )
+  }
+
+  <div class="card__head">
+    <h2 class="card__title">
+      {/*
+        链接只包住标题，卡片的可点击区域靠 ::after 铺满 —— 这样读屏软件
+        读到的链接名就是标题本身，而不是把整张卡片的内容念一遍。
+      */}
+      <a class="card__link" href={href}>{data.title}</a>
+    </h2>
+    <PriceBadge price={data.price} />
+  </div>
+
+  <p class="card__summary">{data.summary}</p>
+
+  <ul class="card__tech">
+    {data.tech.map((item) => <li>{item}</li>)}
+  </ul>
+
+  <span class="card__cta">查看详情</span>
+</article>

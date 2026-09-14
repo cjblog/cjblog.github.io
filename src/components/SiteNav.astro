@@ -1,0 +1,31 @@
+---
+import { MODULES, SITE } from '../lib/site';
+import type { ModuleId } from '../lib/site';
+
+interface Props {
+  /** 服务端渲染时的默认高亮模块；首页会在客户端按 hash 修正 */
+  active?: ModuleId;
+}
+
+const { active = 'projects' } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-title" href="/">{SITE.title}</a>
+    <nav class="site-nav" aria-label="站点模块">
+      {
+        MODULES.map((module) => (
+          <a
+            class="site-nav__link"
+            href={`/${module.hash}`}
+            data-module={module.id}
+            aria-current={active === module.id ? 'true' : undefined}
+          >
+            {module.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
