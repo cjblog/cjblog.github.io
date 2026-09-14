@@ -39,9 +39,17 @@ npm run test:e2e     # Playwright 端到端测试
 ```bash
 npx vitest run tests/unit/reading-time.test.ts   # 单个测试文件
 npx vitest run -t "计算阅读时长"                  # 按用例名筛选
-npx playwright test tests/e2e/cards.spec.ts      # 单个 e2e 文件
+npx playwright test tests/e2e/projects.spec.ts   # 单个 e2e 文件
 npx playwright test --ui                         # e2e 交互式调试
 ```
+
+**把同一套 e2e 打到线上**（验证「本地预览 == 线上」最直接的办法）：
+
+```bash
+PLAYWRIGHT_BASE_URL=https://cjblog.github.io npx playwright test
+```
+
+设了这个环境变量后不再启动本地 webServer，直接对线上地址断言。部署后想确认线上没坏，跑这一条就够了。注意它只做只读的导航与断言，不会改动线上内容。
 
 **写内容的正确流程**：在 `drafts/` 下写 markdown → `npm run sync` → `npm run dev` 预览。
 

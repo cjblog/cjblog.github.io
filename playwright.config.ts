@@ -1,7 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 4321;
-const baseURL = `http://localhost:${PORT}`;
+/**
+ * 默认打本地构建产物。设了 PLAYWRIGHT_BASE_URL 就打指定的地址，
+ * 例如直接对线上跑一遍，验证「本地预览 == 线上」：
+ *
+ *   PLAYWRIGHT_BASE_URL=https://cjblog.github.io npx playwright test
+ *
+ * 这种情况下不再启动本地 webServer。
+ */
+const remoteBaseURL = process.env.PLAYWRIGHT_BASE_URL;
+const baseURL = remoteBaseURL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -21,10 +30,12 @@ export default defineConfig({
 
   // 端到端测的是构建产物而非 dev 服务器：dev 下 Astro 按需编译，
   // 与线上真正跑的东西不是一回事。
-  webServer: {
-    command: 'npm run build && npm run preview',
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-  },
+  webServer: remoteBaseURL
+    ? undefined
+    : {
+        command: 'npm run build && npm run preview',
+        url: baseURL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 180_000,
+      },
 });
