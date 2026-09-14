@@ -45,15 +45,28 @@ export const projectSchema = z.object({
   link: httpUrl.optional(),
 });
 
+/**
+ * 独立页面（「关于作者」这类）。不走列表，没有日期与置顶的概念，
+ * 只产出根路径下的一个页面。slug 有额外限制，见 sync.ts 的保留字检查。
+ */
+export const pageSchema = z.object({
+  title: z.string().min(1, 'title 不能为空'),
+  description: z.string().optional(),
+  order: z.number().default(0),
+  draft: z.boolean().default(false),
+});
+
 export type PostFrontmatter = z.infer<typeof postSchema>;
+export type PageFrontmatter = z.infer<typeof pageSchema>;
 export type ProjectFrontmatter = z.infer<typeof projectSchema>;
 export type Price = z.infer<typeof priceSchema>;
 export type PriceType = Price['type'];
 
-/** 草稿目录里两类内容的子目录名，sync 与 content.config.ts 共用。 */
+/** 草稿目录里各类内容的子目录名，sync 与 content.config.ts 共用。 */
 export const COLLECTIONS = {
   posts: { dir: 'posts', schema: postSchema },
   projects: { dir: 'projects', schema: projectSchema },
+  pages: { dir: 'pages', schema: pageSchema },
 } as const;
 
 export type CollectionName = keyof typeof COLLECTIONS;

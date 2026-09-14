@@ -70,6 +70,53 @@ describe('planSync 草稿过滤', () => {
   });
 });
 
+describe('planSync 独立页面', () => {
+  const page = (extra = '') => `---\ntitle: 关于作者\n${extra}---\n\n正文内容。`;
+
+  it('解析出独立页面', () => {
+    const { entries, errors } = planSync([draft('pages/about.md', page())]);
+
+    expect(errors).toEqual([]);
+    expect(entries[0]).toMatchObject({ collection: 'pages', slug: 'about' });
+  });
+
+  it('页面不需要日期字段', () => {
+    const { errors } = planSync([draft('pages/contact.md', page())]);
+    expect(errors).toEqual([]);
+  });
+
+  it('缺 title 时报错', () => {
+    const { errors } = planSync([draft('pages/bad.md', `---\ndescription: 只有描述\n---\n\n正文。`)]);
+    expect(errors[0]!.file).toBe('pages/bad.md');
+    expect(errors[0]!.reason).toContain('title');
+  });
+
+  it('draft: true 的页面不产出', () => {
+    const { entries } = planSync([draft('pages/wip.md', page('draft: true\n'))]);
+    expect(entries).toEqual([]);
+  });
+
+  it('slug 撞上站内已占用的路径时报错', () => {
+    for (const reserved of ['posts', 'projects', 'index', '404', 'images']) {
+      const { entries, errors } = planSync([draft(`pages/${reserved}.md`, page())]);
+
+      expect(entries, `${reserved} 不该被接受`).toEqual([]);
+      expect(errors[0]!.file).toBe(`pages/${reserved}.md`);
+      expect(errors[0]!.reason).toContain('已占用');
+    }
+  });
+
+  it('保留字检查不影响文章与项目', () => {
+    // 只有独立页面会产出到根路径，文章/项目用 /posts/ 与 /projects/ 前缀，不会撞
+    const { entries, errors } = planSync([
+      draft('posts/index.md', validPost()),
+      draft('projects/posts.md', validProject()),
+    ]);
+    expect(errors).toEqual([]);
+    expect(entries).toHaveLength(2);
+  });
+});
+
 describe('planSync 校验失败时指出文件与原因', () => {
   it('缺 title 时报出文件名与字段名', () => {
     const { entries, errors } = planSync([draft('posts/bad.md', `---\ndate: 2026-01-01\n---\n\n正文。`)]);

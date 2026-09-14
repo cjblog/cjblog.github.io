@@ -36,6 +36,23 @@ export interface SyncPlan {
 /** 文件名即 slug，要求 ASCII kebab-case，保证 URL 干净可分享。 */
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+/**
+ * 独立页面产出到根路径 /<slug>/，下面这些 slug 已被站内其它路由占用，
+ * 撞上会生成冲突路由或覆盖不掉的页面，所以在同步阶段就拦下来。
+ */
+export const RESERVED_PAGE_SLUGS = new Set([
+  'index',
+  'posts',
+  'projects',
+  'pages',
+  'page',
+  'tag',
+  'tags',
+  'archives',
+  'images',
+  '404',
+]);
+
 export function planSync(files: readonly DraftFile[]): SyncPlan {
   const entries: SyncedEntry[] = [];
   const errors: SyncError[] = [];
@@ -84,6 +101,14 @@ function parseDraft(file: DraftFile, errors: SyncError[]): ParsedDraft | null {
   const slug = resolveSlug(file.relativePath, errors);
   if (!slug) return null;
 
+  if (collection === 'pages' && RESERVED_PAGE_SLUGS.has(slug)) {
+    errors.push({
+      file: file.relativePath,
+      reason: `「${slug}」是站内已占用的路径，独立页面的文件名不能用它。换一个名字，例如 about-me.md`,
+    });
+    return null;
+  }
+
   const { data, body } = parseFrontmatter(file, errors);
   if (data === null) return null;
 
@@ -103,12 +128,19 @@ function parseDraft(file: DraftFile, errors: SyncError[]): ParsedDraft | null {
 
 function resolveCollection(relativePath: string, errors: SyncError[]): CollectionName | null {
   const [dir] = relativePath.split('/');
-  if (dir === COLLECTIONS.posts.dir || dir === COLLECTIONS.projects.dir) {
-    return dir;
-  }
+
+  // 从 COLLECTIONS 推导，新增集合时这里自动跟上，不用再改一遍
+  const match = (Object.keys(COLLECTIONS) as CollectionName[]).find(
+    (name) => COLLECTIONS[name].dir === dir,
+  );
+  if (match !== undefined) return match;
+
+  const allowed = (Object.keys(COLLECTIONS) as CollectionName[])
+    .map((name) => `drafts/${COLLECTIONS[name].dir}/`)
+    .join('、');
   errors.push({
     file: relativePath,
-    reason: `不认识的目录「${dir ?? ''}」：草稿必须放在 drafts/posts/ 或 drafts/projects/ 下`,
+    reason: `不认识的目录「${dir ?? ''}」：草稿必须放在 ${allowed} 下`,
   });
   return null;
 }

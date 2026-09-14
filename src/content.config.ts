@@ -18,4 +18,10 @@ const projects = defineCollection({
   schema: COLLECTIONS.projects.schema,
 });
 
-export const collections = { posts, projects };
+/** 独立页面（「关于作者」这类），产出根路径下的 /<slug>/ */
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
+  schema: COLLECTIONS.pages.schema,
+});
+
+export const collections = { posts, projects, pages };

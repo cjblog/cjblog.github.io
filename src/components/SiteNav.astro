@@ -1,10 +1,13 @@
 ---
-import { MODULES, SITE } from '../lib/site';
-import type { ModuleId } from '../lib/site';
+import { MODULES, PAGES, SITE } from '../lib/site';
+import type { NavId } from '../lib/site';
 
 interface Props {
-  /** 当前高亮模块。不传则都不高亮（例如 404 页不属于任何模块）。 */
-  active?: ModuleId;
+  /**
+   * 当前高亮的导航项。不传则都不高亮（例如 404 页不属于任何一项）。
+   * 首页会在客户端按 hash 修正前两项。
+   */
+  active?: NavId;
 }
 
 const { active } = Astro.props;
@@ -13,7 +16,7 @@ const { active } = Astro.props;
 <header class="site-header">
   <div class="site-header__inner">
     <a class="site-title" href="/">{SITE.title}</a>
-    <nav class="site-nav" aria-label="站点模块">
+    <nav class="site-nav" aria-label="站点导航">
       {
         MODULES.map((module) => (
           <a
@@ -23,6 +26,21 @@ const { active } = Astro.props;
             aria-current={active === module.id ? 'true' : undefined}
           >
             {module.label}
+          </a>
+        ))
+      }
+      {
+        /*
+         * 独立页面是真实页面，不是首页上的模块，所以不加 data-module ——
+         * 首页那段按 hash 同步高亮的脚本不该动它们。
+         */
+        PAGES.map((page) => (
+          <a
+            class="site-nav__link"
+            href={page.path}
+            aria-current={active === page.id ? 'true' : undefined}
+          >
+            {page.label}
           </a>
         ))
       }

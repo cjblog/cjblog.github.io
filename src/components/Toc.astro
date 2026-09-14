@@ -1,0 +1,90 @@
+---
+import { buildToc, flattenToc } from '../lib/toc';
+import type { TocHeading } from '../lib/toc';
+
+interface Props {
+  /** 直接来自 Astro 的 render(entry).headings —— 其中的 slug 就是页面里真实的 id */
+  headings: readonly TocHeading[];
+  label?: string;
+}
+
+const { headings, label = '本页目录' } = Astro.props;
+
+// 最多 4 级；层级整理与截断都在 src/lib/toc.ts（纯函数，有单测）
+const links = flattenToc(buildToc(headings));
+---
+
+{
+  links.length > 0 && (
+    <nav class="toc" aria-labelledby="toc-heading">
+      <h2 class="toc__heading" id="toc-heading">
+        {label}
+      </h2>
+      <ul class="toc__list">
+        {links.map((link) => (
+          <li class="toc__item" style={`--level: ${link.level}`}>
+            <a class="toc__link" href={`#${link.slug}`}>
+              {link.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<script>
+  /*
+   * 滚动时高亮当前小节。
+   *
+   * 用「视口上方最后一个标题」而不是 IntersectionObserver：后者在一屏里同时
+   * 有多个标题可见时要额外处理优先级，反而更容易出现高亮来回跳。
+   */
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc__link'));
+
+  if (links.length > 0) {
+    // href 里的中文会被编码，而元素的 id 是原始文本，比较前要解码
+    const targets = links
+      .map((link) => ({
+        link,
+        slug: decodeURIComponent(link.hash.slice(1)),
+      }))
+      .map((entry) => ({ ...entry, element: document.getElementById(entry.slug) }))
+      .filter((entry): entry is typeof entry & { element: HTMLElement } => entry.element !== null);
+
+    const HEADER_OFFSET = 120;
+
+    const update = (): void => {
+      let currentSlug: string | null = null;
+      for (const target of targets) {
+        if (target.element.getBoundingClientRect().top <= HEADER_OFFSET) {
+          currentSlug = target.slug;
+        } else {
+          break;
+        }
+      }
+
+      for (const target of targets) {
+        if (target.slug === currentSlug) {
+          target.link.setAttribute('aria-current', 'true');
+        } else {
+          target.link.removeAttribute('aria-current');
+        }
+      }
+    };
+
+    let queued = false;
+    const onScroll = (): void => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        update();
+      });
+    };
+
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('hashchange', onScroll);
+  }
+</script>

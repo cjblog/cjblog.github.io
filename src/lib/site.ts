@@ -14,3 +14,14 @@ export const MODULES = [
 ] as const;
 
 export type ModuleId = (typeof MODULES)[number]['id'];
+
+/**
+ * 独立页面，各自是根路径下的一个真实页面（不是首页上的模块）。
+ * id 与 drafts/pages/<id>.md 的文件名对应。
+ */
+export const PAGES = [{ id: 'about', label: '关于作者', path: '/about/' }] as const;
+
+export type PageId = (typeof PAGES)[number]['id'];
+
+/** 导航高亮的取值：既可能是首页模块，也可能是独立页面。 */
+export type NavId = ModuleId | PageId;

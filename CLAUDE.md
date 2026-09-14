@@ -59,23 +59,24 @@ PLAYWRIGHT_BASE_URL=https://cjblog.github.io npx playwright test
 drafts/                     # 唯一的写作入口，手工编辑这里
   posts/*.md                # 技术文章
   projects/*.md             # 项目（卡片 + 详情页）
+  pages/*.md                # 独立页面（关于作者这类），产出到根路径 /<slug>/
 scripts/sync-drafts.ts      # 瘦 CLI：只负责读盘写盘，逻辑在 src/lib/sync.ts
 scripts/serve-dist.mjs      # 预览 dist/ 的前台静态服务器（npm run preview 用它）
 src/
   lib/schema.ts             # zod schema：frontmatter 校验的唯一真源
   lib/sync.ts               # planSync() 纯函数：校验 + 规划产出（有单测）
   lib/markdown.ts           # 渲染流水线 + stripMarkdown
+  lib/toc.ts                # 目录：建树、截断到 4 级、压平（有单测）
   lib/reading-time.ts       # 字数统计与阅读时长
   lib/excerpt.ts            # 摘要推导
   lib/pricing.ts            # 价格 → 标签/颜色映射
   lib/sort.ts               # 确定性排序
-  lib/date.ts  lib/site.ts  # 日期归一化 / 站点常量
+  lib/date.ts  lib/site.ts  # 日期归一化 / 站点常量（含导航项）
   content.config.ts         # 把 schema 接到 Astro 内容层
-  content/posts/            # 由 sync 生成，不要手工编辑
-  content/projects/         # 由 sync 生成，不要手工编辑
-  components/               # ProjectCard、PostListItem、BlogLayout 等
+  content/posts|projects|pages/   # 由 sync 生成，不要手工编辑
+  components/               # ProjectCard、PostListItem、BlogLayout、Toc 等
   layouts/BaseLayout.astro
-  pages/                    # index、projects/[slug]、posts/[slug]
+  pages/                    # index、[page]（独立页面）、posts/[slug]、projects/[slug]
   styles/global.css         # 设计令牌与全部样式
 public/                     # 静态资源，原样拷贝到 dist/
 tests/unit/  tests/e2e/
@@ -172,6 +173,25 @@ drafts/*.md  --sync-drafts.mjs(校验+复制)-->  src/content/  --Astro 内容�
 - 切换不要改成 JS 控制 `hidden` 属性。`:target` 在首次绘制前就生效，不会先闪一下默认模块，也**不需要**在 `<head>` 里放同步脚本——曾经有过一段给 `<html>` 打标记的内联脚本，改成 `:target` 之后它就是死代码，已删除。
 - **不要把当前模块写回 `<html>` 的 `data-module` 属性**：导航链接用的就是 `data-module`，同名会被 `[data-module="..."]` 选择器同时匹配到，测试直接报 strict mode violation。导航高亮只通过链接上的 `aria-current` 表达。
 
+### 目录（TOC）
+
+文章、项目详情页与独立页面共用 `src/components/Toc.astro`，宽屏在右侧、窄屏移到正文上方。
+
+**标题数据必须来自 Astro 的 `render(entry).headings`，不要自己解析 markdown 生成 slug。** 那里面的 slug 就是页面里真实生成的 `id`，锚点一定对得上；自己实现需要复刻 Astro 的 slugger 规则，两边一旦有细微差异锚点就会静默失效。`src/lib/toc.ts` 只做纯数据整理（建树、截断到 4 级、压平），因此可以单测。
+
+配套约束：
+
+- 没有足够标题时（少于 2 个）不渲染目录，此时 `.detail__layout--with-toc` 不出现，退回单列，不留空列。
+- 窄屏换位置用的是 `grid-template-areas` 而不是 CSS `order`。`order` 只改视觉顺序，读屏与 Tab 顺序仍按 DOM，会与看到的不一致。
+
+### 独立页面与保留 slug
+
+`drafts/pages/*.md` 产出到根路径 `/<slug>/`（`src/pages/[page].astro`，单段动态路由；Astro 会先匹配更具体的静态路由，所以不会截走 `/posts/…`）。
+
+代价是 slug 可能撞上站内已占用的路径，所以 `src/lib/sync.ts` 里有 `RESERVED_PAGE_SLUGS`（`index`、`posts`、`projects`、`404`、`images`、`tags` 等）在同步阶段拦下。**新增根路径路由时记得往这个集合里加一项**，否则会出现两个页面抢同一个地址。
+
+新增独立页面后还要在 `src/lib/site.ts` 的 `PAGES` 里加一项，它才会出现在导航上。
+
 ### 视觉与风格的硬约定
 
 - **字体自托管**（`@fontsource`），不引第三方 CDN——静态站不该因为外部字体服务抖动而闪一下无样式文字。中文回落系统字体，不加载多 MB 的中文 Web 字体。
@@ -221,6 +241,7 @@ drafts/*.md  --sync-drafts.mjs(校验+复制)-->  src/content/  --Astro 内容�
 - **`sync-drafts`** — 校验逻辑：缺字段、`date` 非法、`paid` 无 `amount`、slug 重复时都要中止并报出**文件名**；`draft: true` 的文章不进入产出集合。
 - **`sort`** — 文章按发布时间倒序、置顶文章正确分到右栏；项目按 `order` 升序，`order` 相同时的次序要确定（不要依赖文件系统遍历顺序）。
 - **`markdown`** — 流水线把 `$x^2$` 与 `$$...$$` 转成 KaTeX 标记，且表格与图片结构在转换后仍完整保留。
+- **`toc`** — 建树（同级平铺、浅层作父、跳级不凭空补父节点、以 h3 开头时自成根）、截断到 4 级、压平后的层级用于缩进、少于两个标题不显示。
 
 ### 端到端测试清单（`tests/e2e/`）
 
@@ -230,6 +251,9 @@ drafts/*.md  --sync-drafts.mjs(校验+复制)-->  src/content/  --Astro 内容�
 - 点击卡片进入详情页，页面上表格、图片、公式均渲染成功（公式要断言 KaTeX 标记存在，不是只断言文字）。
 - 技术文章右栏置顶顺序正确。
 - 窄视口（手机宽度）下卡片退化为单列。
+- 目录：每个锚点都能在正文里找到对应标题、只收录 1–4 级、点击跳转并标为当前、滚动时高亮跟随、窄屏移到正文上方且不再吸顶。
+- 独立页面：可访问、导航高亮正确、首页的模块切换脚本不会误点亮它。
+- 内容完整性（`content.spec.ts`）：所有详情页无死链、无 KaTeX 报错、可视正文里不漏出 LaTeX 源码或 markdown 标记（**漏出反引号几乎总是行内代码的反引号没配对**）。
 
 ### 组件测试
 
@@ -265,5 +289,6 @@ checkout → setup-node → npm ci → npm run test → npm run build
 - **`sortPostsByDateDesc` 这类函数按 Astro `CollectionEntry` 的形状取值（`entry.data.date`），不是拍平的 `entry.date`。** 这里踩过一次：单测按拍平形状写全绿，但站点构建报「date 不是合法日期：undefined」。写涉及 entry 的工具函数时，测试数据也要用 `{ data: {...} }` 的形状。
 - `Array.prototype.sort` 在**只有一个元素时不调用比较器**，所以「日期非法就抛错」这类防御性校验，用单元素测试是测不出来的——测试至少要给两个元素。
 - 卡片用「链接只包住标题 + `::after` 铺满整卡」的写法（`ProjectCard.astro`），**不要**改成把整张卡片套进 `<a>`：那样读屏软件会把整卡内容念成一个链接名。
+- **媒体查询不增加 CSS 优先级。** 同优先级的规则由源码顺序决定，所以「宽屏一套、窄屏覆盖」时，窄屏那段必须写在被覆盖的规则**之后**。踩过一次：`.toc` 的规则写在媒体查询之后，导致窄屏的 `position: static` 被后面的 `position: sticky` 盖掉，目录在正文上方还吸顶遮住内容。
 - **`astro preview` 不能用作 Playwright 的 `webServer` 命令**：Astro 7 的 preview 会把服务转入后台并让前台进程退出，Playwright 判定「exited early」直接失败，而且在 4321 上留下常驻守护进程，下次构建时端口被占（症状是 `Preview server already running`）。所以 `npm run preview` 指向自己写的 `scripts/serve-dist.mjs`，前台运行、无额外依赖。若确实误跑了 `astro preview`，用 `npx astro preview stop` 收尾。
 - **不要断言「页面不含 `$`」来验证公式渲染**。两个反例：文章本身在讨论公式语法时，会用行内代码展示字面量 `` `$...$` ``（正确行为）；KaTeX 默认输出 `htmlAndMathml`，MathML 的 `<annotation>` 里带着原始 LaTeX 源码，所以 `textContent` 里能找到 `\alpha`。要验证就断言**可视元素**——例如某个段落里 `.katex` 的个数。

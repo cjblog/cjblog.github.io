@@ -12,13 +12,14 @@ import '../styles/global.css';
 import FormulaBackground from '../components/FormulaBackground.astro';
 import SiteNav from '../components/SiteNav.astro';
 import { SITE } from '../lib/site';
-import type { ModuleId } from '../lib/site';
+import type { NavId } from '../lib/site';
 
 interface Props {
   /** 页面标题；会拼上站名 */
   title?: string;
   description?: string;
-  active?: ModuleId;
+  /** 当前高亮的导航项；不传则都不高亮 */
+  active?: NavId;
 }
 
 const { title, description = SITE.description, active } = Astro.props;

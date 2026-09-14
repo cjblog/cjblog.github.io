@@ -153,6 +153,57 @@ order: 10
 
 ---
 
+## 加一个独立页面
+
+「关于作者」这类不属于任何模块、单独存在的页面，放在 `drafts/pages/` 下：
+
+```text
+drafts/pages/about.md   →   https://cjblog.github.io/about/
+```
+
+frontmatter 只需要标题：
+
+```markdown
+---
+title: 关于作者
+description: 出现在搜索引擎与分享卡片上的一句话，可选
+---
+
+正文从这里开始。
+```
+
+| 字段 | 必填 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `title` | 是 | — | 页面标题，同时作为浏览器标签页标题 |
+| `description` | 否 | 站点的默认描述 | 页面的 meta description |
+| `draft` | 否 | `false` | 设为 `true` 则不产出这一页 |
+
+**文件名有限制**：独立页面产出在根路径下，所以不能占用站内已有的路径——`posts`、`projects`、`index`、`404`、`images`、`tags` 这些名字会被同步拦下并提示换一个。
+
+新建页面后需要在 `src/lib/site.ts` 的 `PAGES` 里加一项，它才会出现在导航上：
+
+```ts
+export const PAGES = [
+  { id: 'about', label: '关于作者', path: '/about/' },
+  // 再加一个就是：{ id: 'contact', label: '联系我', path: '/contact/' },
+];
+```
+
+---
+
+## 文章目录（自动生成）
+
+文章、项目详情页与独立页面在**宽屏下会自动在右侧显示目录**，窄屏下移到正文上方。不需要任何配置——目录由正文里的一到四级标题自动生成，点击可以跳转，滚动时会高亮当前所在的小节。
+
+两条规则：
+
+- **只收录 1–4 级标题**，`#####` 及更深的标题不进目录
+- **标题少于两个时不显示目录**，一两个标题不需要目录
+
+想让某个小节能出现在目录里，用 `##` 而不是加粗文字——加粗不是标题，不会进目录。
+
+---
+
 ## 数学公式
 
 行内公式用单个美元符号，行间公式用两个并**前后留空行**：
@@ -195,11 +246,12 @@ $$
 
 ```text
 drafts/                  ← 你写内容的地方，只改这里
-  posts/*.md
-  projects/*.md
+  posts/*.md             # 技术文章
+  projects/*.md          # 项目
+  pages/*.md             # 独立页面（关于作者这类）
 src/
   content/               ← npm run sync 生成，不要手工改
-  lib/                   ← 字数统计、摘要、价格映射等纯函数
+  lib/                   ← 字数统计、摘要、价格映射、目录等纯函数
   components/  layouts/  pages/  styles/
 public/                  ← 图片、favicon 等原样拷贝的静态资源
 tests/                   ← 单元测试与端到端测试

@@ -1,0 +1,47 @@
+---
+import { getCollection, render } from 'astro:content';
+import 'katex/dist/katex.min.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Toc from '../components/Toc.astro';
+import { PAGES } from '../lib/site';
+import { shouldShowToc } from '../lib/toc';
+
+/**
+ * 独立页面（drafts/pages/*.md）。产出到根路径 /<slug>/。
+ *
+ * 这是单段动态路由，Astro 会先匹配更具体的静态路由，所以 /posts/… 与
+ * /projects/… 不会被它截走。真正需要防的是 slug 撞上已占用的路径，
+ * 那由 sync 的保留字检查拦下（见 src/lib/sync.ts）。
+ */
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages.map((entry) => ({ params: { page: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const showToc = shouldShowToc(headings);
+// 只把确实在导航里的页面标为高亮，避免类型上把任意字符串当成 NavId
+const navId = PAGES.find((page) => page.id === entry.id)?.id;
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  active={navId}
+>
+  <article class={`detail ${showToc ? 'detail--with-toc' : ''}`}>
+    <div class={`detail__layout ${showToc ? 'detail__layout--with-toc' : ''}`}>
+      <header class="detail__header">
+        <h1 class="detail__title">{entry.data.title}</h1>
+      </header>
+
+      {showToc && <Toc headings={headings} />}
+
+      <div class="detail__body prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>

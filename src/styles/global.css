@@ -38,6 +38,8 @@
   --blog-width: 1080px;
   /* 约 40 个汉字一行，中文正文的舒适区 */
   --measure: 42rem;
+  /* 详情页右侧目录列的宽度 */
+  --toc-width: 15rem;
 
   --font-ui: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
@@ -593,9 +595,132 @@ main:has(.module--posts:target) .module--projects {
    详情页
    ========================================================================== */
 
+/* 详情页：正文列 + 右侧目录列。
+   没有目录时退回单列（.detail--with-toc 不出现），不留空列。 */
 .detail {
   max-width: var(--measure);
   margin-inline: auto;
+}
+
+.detail--with-toc {
+  max-width: calc(var(--measure) + var(--toc-width) + var(--space-6));
+}
+
+.detail__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'header'
+    'body';
+  gap: var(--space-6) 0;
+}
+
+.detail__layout--with-toc {
+  grid-template-columns: minmax(0, 1fr) var(--toc-width);
+  grid-template-areas:
+    'header toc'
+    'body   toc';
+  gap: var(--space-6);
+}
+
+.detail__header {
+  grid-area: header;
+}
+
+.detail__body {
+  grid-area: body;
+  min-width: 0;
+}
+
+/* 窄屏下目录从右栏挪到标题与正文之间。
+   用 grid-template-areas 换位置而不是 CSS order：后者只改视觉顺序，
+   读屏与键盘 Tab 顺序仍按 DOM，会与看到的不一致。 */
+@media (max-width: 1080px) {
+  .detail--with-toc {
+    max-width: var(--measure);
+  }
+
+  .detail__layout--with-toc {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'header'
+      'toc'
+      'body';
+    gap: var(--space-5) 0;
+  }
+}
+
+/* ==========================================================================
+   文章目录
+   ========================================================================== */
+
+.toc {
+  grid-area: toc;
+  position: sticky;
+  top: 5.5rem; /* 让开吸顶的站点导航 */
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  font-size: var(--text-xs);
+}
+
+.toc__heading {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.toc__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* 用左侧一条细线表达层级，比给每一级缩进更省横向空间 */
+  border-left: 1px solid var(--line);
+}
+
+.toc__item {
+  /* --level 由组件按层级写入 */
+  padding-left: calc((var(--level, 1) - 1) * var(--space-3));
+}
+
+.toc__link {
+  display: block;
+  padding: var(--space-1) var(--space-3);
+  color: var(--ink-muted);
+  text-decoration: none;
+  line-height: 1.5;
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.toc__link:hover {
+  color: var(--accent-deep);
+}
+
+.toc__link[aria-current='true'] {
+  color: var(--accent-deep);
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+
+/* 窄屏下目录被挪到正文上方，此时吸顶会盖住内容。
+   这段必须放在 .toc 定义之后：媒体查询不增加优先级，同优先级的规则
+   由源码顺序决定，写在前面会被上面的 position: sticky 覆盖。 */
+@media (max-width: 1080px) {
+  .toc {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* 锚点跳转后标题别被吸顶导航盖住 */
+.prose :is(h1, h2, h3, h4, h5, h6) {
+  scroll-margin-top: 5.5rem;
 }
 
 .detail__header {

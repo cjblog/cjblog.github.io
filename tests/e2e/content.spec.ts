@@ -9,14 +9,27 @@ import { expect, test } from '@playwright/test';
 
 async function collectDetailLinks(page: import('@playwright/test').Page): Promise<string[]> {
   await page.goto('/');
-  const hrefs = await page
+
+  const contentLinks = await page
     .locator('.card__link, #posts .post-item__title a, .rail__item a')
     .evaluateAll((nodes) =>
       nodes
         .map((node) => node.getAttribute('href'))
         .filter((href): href is string => Boolean(href) && href.startsWith('/')),
     );
-  return [...new Set(hrefs)];
+
+  // 导航里的独立页面（/about/ 这类）——排除首页模块（'/' 与 '/#posts'），
+  // 它们不是独立页面。以后新增独立页面会被自动纳入检查。
+  const pageLinks = await page.locator('.site-nav__link').evaluateAll((nodes) =>
+    nodes
+      .map((node) => node.getAttribute('href'))
+      .filter(
+        (href): href is string =>
+          Boolean(href) && href!.startsWith('/') && href !== '/' && !href!.startsWith('/#'),
+      ),
+  );
+
+  return [...new Set([...contentLinks, ...pageLinks])];
 }
 
 test.describe('内容完整性', () => {
