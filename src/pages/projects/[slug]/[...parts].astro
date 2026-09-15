@@ -1,0 +1,127 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import 'katex/dist/katex.min.css';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BookNav from '../../../components/BookNav.astro';
+import Toc from '../../../components/Toc.astro';
+import {
+  bookSourcePathFromId,
+  bookSourcesFromEntries,
+  parseBookOutline,
+  type BookOutline,
+} from '../../../lib/book';
+import { readingStats } from '../../../lib/reading-time';
+import { shouldShowToc } from '../../../lib/toc';
+
+/**
+ * 书里的章与节。落地页是 `[slug]/index.astro`，这里只产出**有层级**的页面，
+ * 所以不会和落地页抢地址。
+ *
+ * parts 是单段（章）或两段（节），用 catch-all 一条路由覆盖，避免出现
+ * `[chapter].astro` 与 `[chapter]/` 同名文件与目录并存的结构。
+ */
+export async function getStaticPaths() {
+  const [projects, chapters] = await Promise.all([
+    getCollection('projects'),
+    getCollection('bookChapters'),
+  ]);
+
+  const paths = [];
+
+  for (const project of projects) {
+    // 按**源文件路径**索引条目，不要按 slug —— 条目 id 保留数字前缀，
+    // 与目录里去掉前缀的 slug 不是一回事
+    const bySourcePath = new Map(
+      chapters
+        .filter((entry) => entry.id.startsWith(`${project.id}/`))
+        .map((entry) => [bookSourcePathFromId(project.id, entry.id), entry]),
+    );
+
+    const { outline } = parseBookOutline(bookSourcesFromEntries(project.id, chapters));
+
+    for (const chapter of outline.chapters) {
+      const chapterEntry = bySourcePath.get(chapter.sourcePath);
+      if (chapterEntry) {
+        paths.push({
+          params: { slug: project.id, parts: chapter.slug },
+          props: { project, entry: chapterEntry, outline, parts: [chapter.slug] },
+        });
+      }
+
+      for (const section of chapter.sections) {
+        const sectionEntry = bySourcePath.get(section.sourcePath);
+        if (!sectionEntry) continue;
+
+        paths.push({
+          params: { slug: project.id, parts: `${chapter.slug}/${section.slug}` },
+          props: {
+            project,
+            entry: sectionEntry,
+            outline,
+            parts: [chapter.slug, section.slug],
+          },
+        });
+      }
+    }
+  }
+
+  return paths;
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  entry: CollectionEntry<'bookChapters'>;
+  outline: BookOutline;
+  parts: string[];
+}
+
+const { project, entry, outline, parts } = Astro.props;
+const { Content, headings } = await render(entry);
+
+/*
+ * 标题优先取 frontmatter，没有就回退到目录里的名字（由文件名解析而来）。
+ * 不能只用 frontmatter —— 章 / 节的 title 是可选的，大多数文件不会写。
+ */
+const chapterNode = outline.chapters.find((chapter) => chapter.slug === parts[0]);
+const sectionNode = chapterNode?.sections.find((section) => section.slug === parts[1]);
+const title = sectionNode?.title ?? chapterNode?.title ?? entry.id;
+
+const stats = readingStats(entry.body ?? '');
+const showToc = shouldShowToc(headings);
+---
+
+<BaseLayout title={title} description={`${project.data.title} · ${title}`} active="projects">
+  <article
+    class:list={['detail', showToc && 'detail--with-toc', 'detail--with-book']}
+  >
+    <a class="detail__back" href={`/projects/${project.id}/`}>返回 {project.data.title}</a>
+
+    <div
+      class:list={[
+        'detail__layout',
+        showToc && 'detail__layout--with-toc',
+        'detail__layout--with-book',
+      ]}
+    >
+      <BookNav
+        projectSlug={project.id}
+        projectTitle={project.data.title}
+        outline={outline}
+        currentParts={parts}
+      />
+
+      <header class="detail__header">
+        <h1 class="detail__title">{title}</h1>
+        <p class="post-meta">
+          <span>阅读 <span class="post-meta__value">{stats.label}</span></span>
+        </p>
+      </header>
+
+      {showToc && <Toc headings={headings} />}
+
+      <div class="detail__body prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+</BaseLayout>

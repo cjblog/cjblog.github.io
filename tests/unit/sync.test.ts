@@ -117,6 +117,157 @@ describe('planSync 独立页面', () => {
   });
 });
 
+describe('planSync 书（多文件项目）', () => {
+  const bookIndex = `---\ntitle: 我的书\nsummary: 一本示例书\ntech: [Astro]\nprice:\n  type: free\n---\n\n书的首页。`;
+
+  const bookFiles = [
+    draft('projects/my-book/index.md', bookIndex),
+    draft('projects/my-book/01-起步.md', `---\ntitle: 第一章 起步\n---\n\n章的正文。`),
+    draft('projects/my-book/01-起步/01-安装.md', `\n节的正文，没有 frontmatter。`),
+    draft('projects/my-book/02-进阶.md', `\n第二章。`),
+  ];
+
+  it('把书的首页产出成项目条目', () => {
+    const { entries, errors } = planSync(bookFiles);
+
+    expect(errors).toEqual([]);
+    const index = entries.find((entry) => entry.collection === 'projects');
+    expect(index).toMatchObject({ slug: 'my-book', outputPath: 'my-book/index.md' });
+  });
+
+  it('章与节产出到 projects/<书>/chapters/ 下，保留原文件名', () => {
+    const { entries } = planSync(bookFiles);
+    const chapters = entries.filter((entry) => entry.collection === 'bookChapters');
+
+    expect(chapters.map((entry) => entry.outputPath).sort()).toEqual([
+      'my-book/chapters/01-起步.md',
+      'my-book/chapters/01-起步/01-安装.md',
+      'my-book/chapters/02-进阶.md',
+    ]);
+  });
+
+  it('条目标识用去掉数字前缀的 slug，与页面路由一致', () => {
+    const { entries } = planSync(bookFiles);
+    const chapters = entries.filter((entry) => entry.collection === 'bookChapters');
+
+    expect(chapters.map((entry) => entry.slug).sort()).toEqual(
+      ['my-book/起步', 'my-book/起步/安装', 'my-book/进阶'].sort(),
+    );
+  });
+
+  it('节可以完全没有 frontmatter', () => {
+    const { errors } = planSync([bookFiles[0]!, bookFiles[2]!]);
+    expect(errors).toEqual([]);
+  });
+
+  it('frontmatter 的 title 会被保留到产出里', () => {
+    const { entries } = planSync(bookFiles);
+    const chapter = entries.find((entry) => entry.slug === 'my-book/起步');
+
+    expect(chapter?.output).toContain('第一章 起步');
+  });
+
+  it('书目录缺少 index.md 时报错', () => {
+    const { entries, errors } = planSync([
+      draft('projects/my-book/01-起步.md', `\n正文。`),
+    ]);
+
+    expect(entries).toEqual([]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.file).toBe('projects/my-book');
+    expect(errors[0]!.reason).toContain('index.md');
+  });
+
+  it('书的首页也用项目的 schema 校验', () => {
+    const { errors } = planSync([
+      draft('projects/my-book/index.md', `---\ntitle: 缺字段\n---\n\n正文。`),
+    ]);
+
+    expect(errors[0]!.file).toBe('projects/my-book/index.md');
+    expect(errors[0]!.reason).toContain('summary');
+  });
+
+  it('书目录名不合规时报错', () => {
+    const { errors } = planSync([draft('projects/My Book/index.md', bookIndex)]);
+
+    expect(errors[0]!.file).toBe('projects/My Book');
+    expect(errors[0]!.reason).toContain('slug');
+  });
+
+  it('书里的三级目录会被拦下', () => {
+    const { errors } = planSync([
+      bookFiles[0]!,
+      draft('projects/my-book/01-起步/01-安装/01-太深.md', `\n太深了。`),
+    ]);
+
+    expect(errors[0]!.reason).toContain('最多两级');
+  });
+
+  it('单文件项目与书可以共存', () => {
+    const { entries, errors } = planSync([
+      draft('projects/single.md', validProject()),
+      ...bookFiles,
+    ]);
+
+    expect(errors).toEqual([]);
+    const projects = entries.filter((entry) => entry.collection === 'projects');
+    expect(projects.map((entry) => entry.slug).sort()).toEqual(['my-book', 'single']);
+  });
+
+  it('书目录与单文件项目同名时报冲突', () => {
+    const { errors } = planSync([
+      draft('projects/same.md', validProject()),
+      draft('projects/same/index.md', bookIndex),
+    ]);
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]!.reason).toContain('重复');
+  });
+
+  it('书的排序不受文件传入顺序影响', () => {
+    const forward = planSync(bookFiles).entries.map((entry) => entry.slug);
+    const backward = planSync([...bookFiles].reverse()).entries.map((entry) => entry.slug);
+
+    expect(forward.sort()).toEqual(backward.sort());
+  });
+});
+
+describe('planSync 保留 slug', () => {
+  it('文章不能用 page 做文件名（会和分页目录抢地址）', () => {
+    const { entries, errors } = planSync([draft('posts/page.md', validPost())]);
+
+    expect(entries).toEqual([]);
+    expect(errors[0]!.file).toBe('posts/page.md');
+    expect(errors[0]!.reason).toContain('分页');
+  });
+
+  it('项目不能用 page 做文件名', () => {
+    const { errors } = planSync([draft('projects/page.md', validProject())]);
+
+    expect(errors[0]!.reason).toContain('分页');
+  });
+
+  it('书目录也不能叫 page', () => {
+    const { errors } = planSync([
+      draft(
+        'projects/page/index.md',
+        `---\ntitle: 书\nsummary: s\ntech: [A]\nprice:\n  type: free\n---\n\n正文。`,
+      ),
+    ]);
+
+    expect(errors[0]!.reason).toContain('分页');
+  });
+
+  it('其它名字不受影响', () => {
+    const { errors } = planSync([
+      draft('posts/pagination.md', validPost()),
+      draft('projects/pager.md', validProject()),
+    ]);
+
+    expect(errors).toEqual([]);
+  });
+});
+
 describe('planSync 校验失败时指出文件与原因', () => {
   it('缺 title 时报出文件名与字段名', () => {
     const { entries, errors } = planSync([draft('posts/bad.md', `---\ndate: 2026-01-01\n---\n\n正文。`)]);

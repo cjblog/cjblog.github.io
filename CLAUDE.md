@@ -58,25 +58,38 @@ PLAYWRIGHT_BASE_URL=https://cjblog.github.io npx playwright test
 ```
 drafts/                     # 唯一的写作入口，手工编辑这里
   posts/*.md                # 技术文章
-  projects/*.md             # 项目（卡片 + 详情页）
+  projects/*.md             # 单文件项目
+  projects/<书>/            # 多文件项目 = 一本书（见下）
+    index.md                #   书的首页，同时是项目条目
+    01-章.md                #   章
+    01-章/01-节.md          #   节（最多两级）
   pages/*.md                # 独立页面（关于作者这类），产出到根路径 /<slug>/
 scripts/sync-drafts.ts      # 瘦 CLI：只负责读盘写盘，逻辑在 src/lib/sync.ts
 scripts/serve-dist.mjs      # 预览 dist/ 的前台静态服务器（npm run preview 用它）
 src/
-  lib/schema.ts             # zod schema：frontmatter 校验的唯一真源
+  lib/schema.ts             # zod schema：frontmatter 校验的唯一真源；含 OUTPUT_DIRS
   lib/sync.ts               # planSync() 纯函数：校验 + 规划产出（有单测）
   lib/markdown.ts           # 渲染流水线 + stripMarkdown
-  lib/toc.ts                # 目录：建树、截断到 4 级、压平（有单测）
+  lib/toc.ts                # 文章目录：建树、截断到 4 级、压平（有单测）
+  lib/book.ts               # 书的章节解析：排序、两级限制、重名检查（有单测）
+  lib/pagination.ts         # 分页：每页条数、页码序列、第 N 页的地址（有单测）
   lib/reading-time.ts       # 字数统计与阅读时长
   lib/excerpt.ts            # 摘要推导
   lib/pricing.ts            # 价格 → 标签/颜色映射
   lib/sort.ts               # 确定性排序
   lib/date.ts  lib/site.ts  # 日期归一化 / 站点常量（含导航项）
-  content.config.ts         # 把 schema 接到 Astro 内容层
+  content.config.ts         # 把 schema 接到 Astro 内容层（四个集合）
   content/posts|projects|pages/   # 由 sync 生成，不要手工编辑
-  components/               # ProjectCard、PostListItem、BlogLayout、Toc 等
+  components/               # ProjectCard、BlogLayout、Toc、BookNav、Pagination 等
   layouts/BaseLayout.astro
-  pages/                    # index、[page]（独立页面）、posts/[slug]、projects/[slug]
+  pages/
+    index.astro             # 首页：两个模块的第 1 页
+    [page].astro            # 独立页面
+    posts/[slug].astro      # 文章全文
+    posts/page/[page].astro # 文章第 2 页起
+    projects/[slug]/index.astro    # 项目落地页（书在这里显示左侧目录）
+    projects/[slug]/[...parts].astro  # 书的章与节
+    projects/page/[page].astro     # 项目第 2 页起
   styles/global.css         # 设计令牌与全部样式
 public/                     # 静态资源，原样拷贝到 dist/
 tests/unit/  tests/e2e/
@@ -84,10 +97,11 @@ astro.config.mjs  vitest.config.ts  playwright.config.ts
 .github/workflows/deploy.yml
 ```
 
-两条硬约定：
+三条硬约定：
 
 1. **`src/content/` 是生成目录。** 直接改那里的文件会在下次 `npm run sync` 时被覆盖。要改内容就改 `drafts/` 下对应的文件。
 2. **业务逻辑放 `src/lib/` 并且写成纯函数**（输入 → 输出，不依赖文件系统与全局状态）。组件里只做取数与渲染。这样逻辑才能被单测覆盖——这是本仓库测试策略成立的前提。
+3. **`src/content/` 的目录名不等于集合名。** 输出集合有四个（含 `bookChapters`），但要落到的目录只有三个——书的章 / 节写在 `projects/<书>/chapters/` 下，与项目共用一个目录，靠 `content.config.ts` 里不同的 glob 模式分开取。所以读写路径必须走 `src/lib/schema.ts` 的 `OUTPUT_DIRS` 映射，**不要拿集合名当目录名**。这条踩过：章节被写到 `src/content/bookChapters/`，内容层的 glob 根本不会去读那里，表现为章节一个页面都不生成。
 
 ## 内容规范（frontmatter）
 
@@ -184,6 +198,32 @@ drafts/*.md  --sync-drafts.mjs(校验+复制)-->  src/content/  --Astro 内容�
 - 没有足够标题时（少于 2 个）不渲染目录，此时 `.detail__layout--with-toc` 不出现，退回单列，不留空列。
 - 窄屏换位置用的是 `grid-template-areas` 而不是 CSS `order`。`order` 只改视觉顺序，读屏与 Tab 顺序仍按 DOM，会与看到的不一致。
 
+### 分页
+
+项目每页 3 个、文章每页 5 篇（`src/lib/pagination.ts` 的 `PROJECTS_PER_PAGE` / `POSTS_PER_PAGE`）。
+
+**首页承载两个模块的第 1 页，第 2 页起才是独立路由**（`/projects/page/N/`、`/posts/page/N/`）。这个「第 1 页与其余页地址规则不同」的差异集中在 `listPagePath()` 里，由 `firstPageHref` 参数表达——不要在页面里手拼 URL。
+
+配套约束：
+
+- `paginatedPaths()` 只产出**第 2 页起**的静态路径，第 1 页由首页负责。两边都产出会撞路由。
+- 分页页**不能用 `class="module"`**（见下方已知陷阱）。
+- 置顶文章不参与文章分页计数，但每一页的右栏都照常显示——否则翻到第 2 页就没有置顶文章了。
+- 因为分页占用 `/posts/page/N/` 与 `/projects/page/N/`，文章与项目的 slug 里 `page` 是保留字（`RESERVED_LIST_SLUGS`），同步阶段就会拦下。
+
+### 项目 = 一本书
+
+`drafts/projects/<项目>/` 是目录时即为一本书：`index.md` 是项目条目（用项目的 schema），其余文件是章与节，解析在 `src/lib/book.ts`。
+
+**条目 id 与目录里的 slug 不是一回事，这是最容易踩的地方。** 内容层里章条目的 id 是 `<项目>/01-入门`（**保留数字前缀**），而目录里展示与用作 URL 段的 slug 是 `入门`（**去掉前缀**）。按 slug 去查条目会全部查不到，表现为章节一个页面都不生成、构建却完全成功。页面侧要按 `sourcePath` 查（`bookSourcesFromEntries` 与 `bookSourcePathFromId` 是一对互逆的转换）。
+
+其他约束：
+
+- 最多两级，`parseBookOutline` 会报错而不是悄悄截断。
+- 顺序由文件名数字前缀决定，且**必须与传入顺序无关**——`parseBookOutline` 内部统一排序，不要依赖文件系统的遍历顺序。
+- 章可以只有目录、没有同名文件（`hasOwnPage: false`），此时 `chapterHref()` 指向它的第一节。
+- 路由用 `projects/[slug]/[...parts].astro` 一条 catch-all 覆盖章与节。**不要**改成 `[chapter].astro` 与 `[chapter]/[section].astro` 并存——文件与同名目录并存容易让路由解析变得难以推理。
+
 ### 独立页面与保留 slug
 
 `drafts/pages/*.md` 产出到根路径 `/<slug>/`（`src/pages/[page].astro`，单段动态路由；Astro 会先匹配更具体的静态路由，所以不会截走 `/posts/…`）。
@@ -242,6 +282,8 @@ drafts/*.md  --sync-drafts.mjs(校验+复制)-->  src/content/  --Astro 内容�
 - **`sort`** — 文章按发布时间倒序、置顶文章正确分到右栏；项目按 `order` 升序，`order` 相同时的次序要确定（不要依赖文件系统遍历顺序）。
 - **`markdown`** — 流水线把 `$x^2$` 与 `$$...$$` 转成 KaTeX 标记，且表格与图片结构在转换后仍完整保留。
 - **`toc`** — 建树（同级平铺、浅层作父、跳级不凭空补父节点、以 h3 开头时自成根）、截断到 4 级、压平后的层级用于缩进、少于两个标题不显示。
+- **`book`** — 章 / 节解析（名字取文件名去前缀、frontmatter title 优先）、按数字前缀排序且与传入顺序无关（含 `9` 在 `10` 前、`1-x` 在 `1.1-y` 前、无前缀排最后）、超过两级报错、章节重名报错、只有目录没有章文件时 `hasOwnPage` 为 false、`chapterHref` 的三种情形。
+- **`pagination`** — 每页条数、总页数（含 0 条也算 1 页、整除时不多出空页）、取第 N 页、页码序列的省略号折叠、第 1 页与其余页地址的差异、越界抛错、`paginatedPaths` 只产出第 2 页起。
 
 ### 端到端测试清单（`tests/e2e/`）
 
@@ -253,7 +295,11 @@ drafts/*.md  --sync-drafts.mjs(校验+复制)-->  src/content/  --Astro 内容�
 - 窄视口（手机宽度）下卡片退化为单列。
 - 目录：每个锚点都能在正文里找到对应标题、只收录 1–4 级、点击跳转并标为当前、滚动时高亮跟随、窄屏移到正文上方且不再吸顶。
 - 独立页面：可访问、导航高亮正确、首页的模块切换脚本不会误点亮它。
+- 分页：首页只放第一页且数量正确、**各页合起来不重不漏**（总数与控件上写的一致）、页码按钮标出当前页、第一页没有上一页 / 最后一页没有下一页、翻页后地址正确、文章跨页仍按时间倒序、置顶文章在每一页的右栏都在。
+- 书：多文件项目出现左侧目录而单文件项目没有、目录确实是两级且不出现第三级、点击章 / 节进入对应页面且左侧高亮跟随、**书内页右侧的文档目录仍然存在**（两套目录互不干扰）、目录里每个链接都能打开。
 - 内容完整性（`content.spec.ts`）：所有详情页无死链、无 KaTeX 报错、可视正文里不漏出 LaTeX 源码或 markdown 标记（**漏出反引号几乎总是行内代码的反引号没配对**）。
+
+**分页与书的测试不要写死页数和标题**——它们取决于内容多少，写死的话每加一篇文章就会挂一片（踩过一次）。从界面上读出实际页数（`pagination__summary`）再据此断言，并对「各页合起来不重不漏」这类不变量做断言。
 
 ### 组件测试
 
@@ -289,6 +335,7 @@ checkout → setup-node → npm ci → npm run test → npm run build
 - **`sortPostsByDateDesc` 这类函数按 Astro `CollectionEntry` 的形状取值（`entry.data.date`），不是拍平的 `entry.date`。** 这里踩过一次：单测按拍平形状写全绿，但站点构建报「date 不是合法日期：undefined」。写涉及 entry 的工具函数时，测试数据也要用 `{ data: {...} }` 的形状。
 - `Array.prototype.sort` 在**只有一个元素时不调用比较器**，所以「日期非法就抛错」这类防御性校验，用单元素测试是测不出来的——测试至少要给两个元素。
 - 卡片用「链接只包住标题 + `::after` 铺满整卡」的写法（`ProjectCard.astro`），**不要**改成把整张卡片套进 `<a>`：那样读屏软件会把整卡内容念成一个链接名。
+- **`.module` 只给首页那两个模块用。** 它的默认值是 `display: none`（配合 `:target` 切换），随手套到别的页面上会让**整页变成空白**。危险之处在于文字仍在 DOM 里，`allTextContents()` 这类内容断言照样通过、构建也不报错，只有可见性断言（`toBeVisible`）才发现得了。分页页与独立页面都用普通容器。`tests/e2e/pagination.spec.ts` 里那条「第一页没有上一页，最后一页没有下一页」就是靠可见性抓到的。
 - **媒体查询不增加 CSS 优先级。** 同优先级的规则由源码顺序决定，所以「宽屏一套、窄屏覆盖」时，窄屏那段必须写在被覆盖的规则**之后**。踩过一次：`.toc` 的规则写在媒体查询之后，导致窄屏的 `position: static` 被后面的 `position: sticky` 盖掉，目录在正文上方还吸顶遮住内容。
 - **`astro preview` 不能用作 Playwright 的 `webServer` 命令**：Astro 7 的 preview 会把服务转入后台并让前台进程退出，Playwright 判定「exited early」直接失败，而且在 4321 上留下常驻守护进程，下次构建时端口被占（症状是 `Preview server already running`）。所以 `npm run preview` 指向自己写的 `scripts/serve-dist.mjs`，前台运行、无额外依赖。若确实误跑了 `astro preview`，用 `npx astro preview stop` 收尾。
 - **不要断言「页面不含 `$`」来验证公式渲染**。两个反例：文章本身在讨论公式语法时，会用行内代码展示字面量 `` `$...$` ``（正确行为）；KaTeX 默认输出 `htmlAndMathml`，MathML 的 `<annotation>` 里带着原始 LaTeX 源码，所以 `textContent` 里能找到 `\alpha`。要验证就断言**可视元素**——例如某个段落里 `.katex` 的个数。

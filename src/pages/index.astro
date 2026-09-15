@@ -2,7 +2,14 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import BlogLayout from '../components/BlogLayout.astro';
+import Pagination from '../components/Pagination.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import {
+  buildPagination,
+  paginate,
+  POSTS_PER_PAGE,
+  PROJECTS_PER_PAGE,
+} from '../lib/pagination';
 import { selectPinnedPosts, sortPostsByDateDesc, sortProjects } from '../lib/sort';
 
 const projects = sortProjects(await getCollection('projects'));
@@ -12,6 +19,26 @@ const pinned = selectPinnedPosts(posts);
 // 注意取的是 entry.data.pinned —— 内容挂在 data 下，写成 entry.pinned 会恒为 undefined，
 // 过滤静默失效、置顶文章跑进左栏。这条由 e2e 兜底。
 const latest = posts.filter((post) => !post.data.pinned);
+
+// 首页承载两个模块的第 1 页；第 2 页起是 /projects/page/N/ 与 /posts/page/N/
+const projectPage = paginate(projects, 1, PROJECTS_PER_PAGE);
+const postPage = paginate(latest, 1, POSTS_PER_PAGE);
+
+const projectPagination = buildPagination({
+  current: 1,
+  totalItems: projects.length,
+  perPage: PROJECTS_PER_PAGE,
+  firstPageHref: '/',
+  basePath: '/projects/page',
+});
+
+const postPagination = buildPagination({
+  current: 1,
+  totalItems: latest.length,
+  perPage: POSTS_PER_PAGE,
+  firstPageHref: '/#posts',
+  basePath: '/posts/page',
+});
 ---
 
 <BaseLayout active="projects">
@@ -28,9 +55,9 @@ const latest = posts.filter((post) => !post.data.pinned);
     </div>
 
     {
-      projects.length > 0 ? (
+      projectPage.length > 0 ? (
         <div class="card-grid">
-          {projects.map((entry) => (
+          {projectPage.map((entry) => (
             <ProjectCard slug={entry.id} data={entry.data} />
           ))}
         </div>
@@ -41,6 +68,8 @@ const latest = posts.filter((post) => !post.data.pinned);
         </p>
       )
     }
+
+    <Pagination pagination={projectPagination} noun="个项目" label="项目分页" />
   </section>
 
   <section id="posts" class="module module--posts">
@@ -51,7 +80,9 @@ const latest = posts.filter((post) => !post.data.pinned);
       </p>
     </div>
 
-    <BlogLayout latest={latest} pinned={pinned} />
+    <BlogLayout latest={postPage} pinned={pinned} />
+
+    <Pagination pagination={postPagination} noun="篇文章" label="文章分页" />
   </section>
 </BaseLayout>
 

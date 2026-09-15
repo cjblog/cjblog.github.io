@@ -1,0 +1,67 @@
+---
+import type { Pagination } from '../lib/pagination';
+
+interface Props {
+  pagination: Pagination;
+  /** 数量单位，用来拼「共 12 篇文章」 */
+  noun: string;
+  label?: string;
+}
+
+const { pagination, noun, label = '分页导航' } = Astro.props;
+// 只有一页时不显示控件，免得出现一排没有意义的按钮
+const show = pagination.totalPages > 1;
+---
+
+{
+  show && (
+    <nav class="pagination" aria-label={label}>
+      <p class="pagination__summary">
+        第 <span class="post-meta__value">{pagination.current}</span> / {pagination.totalPages} 页　共{' '}
+        <span class="post-meta__value">{pagination.totalItems}</span> {noun}
+      </p>
+
+      <div class="pagination__controls">
+        {pagination.prev ? (
+          <a class="pagination__step" href={pagination.prev} rel="prev">
+            上一页
+          </a>
+        ) : (
+          <span class="pagination__step pagination__step--disabled" aria-hidden="true">
+            上一页
+          </span>
+        )}
+
+        <ul class="pagination__pages">
+          {pagination.items.map((item) =>
+            item.kind === 'gap' ? (
+              <li class="pagination__gap" aria-hidden="true">
+                …
+              </li>
+            ) : (
+              <li>
+                <a
+                  class="pagination__page"
+                  href={item.href}
+                  aria-current={item.current ? 'page' : undefined}
+                >
+                  {item.page}
+                </a>
+              </li>
+            ),
+          )}
+        </ul>
+
+        {pagination.next ? (
+          <a class="pagination__step" href={pagination.next} rel="next">
+            下一页
+          </a>
+        ) : (
+          <span class="pagination__step pagination__step--disabled" aria-hidden="true">
+            下一页
+          </span>
+        )}
+      </div>
+    </nav>
+  )
+}

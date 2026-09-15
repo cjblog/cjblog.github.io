@@ -56,13 +56,28 @@ export const pageSchema = z.object({
   draft: z.boolean().default(false),
 });
 
+/**
+ * 书的章 / 节。标题默认取文件名（去掉数字前缀），所以 frontmatter 是可选的，
+ * 想覆盖时才写 title。
+ */
+export const bookChapterSchema = z.object({
+  title: z.string().optional(),
+});
+
 export type PostFrontmatter = z.infer<typeof postSchema>;
 export type PageFrontmatter = z.infer<typeof pageSchema>;
+export type BookChapterFrontmatter = z.infer<typeof bookChapterSchema>;
 export type ProjectFrontmatter = z.infer<typeof projectSchema>;
 export type Price = z.infer<typeof priceSchema>;
 export type PriceType = Price['type'];
 
-/** 草稿目录里各类内容的子目录名，sync 与 content.config.ts 共用。 */
+/**
+ * 可以在 drafts/ 下直接写作的集合。
+ *
+ * 书的章 / 节**不在这里**——它们不是独立的草稿目录，而是项目目录内部的
+ * 一部分（drafts/projects/<项目>/…），由 sync 整体处理。把 bookChapters
+ * 加进来会凭空造出一个 drafts/bookChapters/ 的合法写作位置。
+ */
 export const COLLECTIONS = {
   posts: { dir: 'posts', schema: postSchema },
   projects: { dir: 'projects', schema: projectSchema },
@@ -70,3 +85,20 @@ export const COLLECTIONS = {
 } as const;
 
 export type CollectionName = keyof typeof COLLECTIONS;
+
+/**
+ * 输出集合 → src/content/ 下的实际目录。
+ *
+ * 输出集合比可写作的集合多一个 bookChapters：书的章 / 节写在
+ * `src/content/projects/<书>/chapters/` 里，与项目集合共享同一个目录
+ * （content.config.ts 用不同的 glob 模式把它们分开取）。
+ * 所以这里必须显式映射，不能拿集合名当目录名。
+ */
+export const OUTPUT_DIRS = {
+  posts: 'posts',
+  projects: 'projects',
+  pages: 'pages',
+  bookChapters: 'projects',
+} as const;
+
+export type OutputCollection = keyof typeof OUTPUT_DIRS;

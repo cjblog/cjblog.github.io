@@ -1,0 +1,76 @@
+---
+import { bookPagePath, chapterHref } from '../lib/book';
+import type { BookOutline } from '../lib/book';
+
+interface Props {
+  projectSlug: string;
+  projectTitle: string;
+  outline: BookOutline;
+  /** 当前所在位置：[] 落地页、['起步'] 章、['起步', '安装'] 节 */
+  currentParts: readonly string[];
+}
+
+const { projectSlug, projectTitle, outline, currentParts } = Astro.props;
+
+const currentKey = currentParts.join('/');
+const onLanding = currentParts.length === 0;
+
+const isCurrent = (key: string) => !onLanding && currentKey === key;
+---
+
+<nav class="book" aria-labelledby="book-heading">
+  <h2 class="book__heading" id="book-heading">{projectTitle}</h2>
+
+  <ul class="book__list">
+    <li class="book__item">
+      <a
+        class="book__link"
+        href={bookPagePath(projectSlug)}
+        aria-current={onLanding ? 'true' : undefined}
+      >
+        项目介绍
+      </a>
+    </li>
+
+    {
+      outline.chapters.map((chapter) => {
+        const href = chapterHref(projectSlug, chapter);
+
+        return (
+          <li class="book__item">
+            {href ? (
+              <a
+                class="book__link"
+                href={href}
+                aria-current={isCurrent(chapter.slug) ? 'true' : undefined}
+              >
+                {chapter.title}
+              </a>
+            ) : (
+              <span class="book__link book__link--plain">{chapter.title}</span>
+            )}
+
+            {chapter.sections.length > 0 && (
+              <ul class="book__sublist">
+                {chapter.sections.map((section) => {
+                  const key = `${chapter.slug}/${section.slug}`;
+                  return (
+                    <li class="book__item">
+                      <a
+                        class="book__link"
+                        href={bookPagePath(projectSlug, [chapter.slug, section.slug])}
+                        aria-current={isCurrent(key) ? 'true' : undefined}
+                      >
+                        {section.title}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </li>
+        );
+      })
+    }
+  </ul>
+</nav>

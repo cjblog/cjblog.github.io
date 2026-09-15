@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { planSync, type DraftFile } from '../src/lib/sync';
-import { COLLECTIONS } from '../src/lib/schema';
+import { COLLECTIONS, OUTPUT_DIRS } from '../src/lib/schema';
 
 /**
  * 把 drafts/ 下的 markdown 同步到 src/content/。
@@ -62,20 +62,26 @@ async function main(): Promise<void> {
     return;
   }
 
-  // 先清空再写入，避免删掉的草稿在 src/content/ 里留下 orphan 页面
-  for (const collection of Object.values(COLLECTIONS)) {
-    await rm(join(contentDir, collection.dir), { recursive: true, force: true });
+  // 先清空再写入，避免删掉的草稿在 src/content/ 里留下 orphan 页面。
+  // 按输出目录去重后清理——书的章 / 节与项目共用 projects/，
+  // 直接用集合名当目录名会写出一个内容层根本不会去读的目录。
+  for (const dir of new Set(Object.values(OUTPUT_DIRS))) {
+    await rm(join(contentDir, dir), { recursive: true, force: true });
   }
 
   for (const entry of entries) {
-    const target = join(contentDir, entry.collection, `${entry.slug}.md`);
+    const target = join(contentDir, OUTPUT_DIRS[entry.collection], entry.outputPath);
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, entry.output, 'utf8');
   }
 
-  const posts = entries.filter((entry) => entry.collection === 'posts').length;
-  const projects = entries.filter((entry) => entry.collection === 'projects').length;
-  console.log(`已同步 ${entries.length} 篇草稿：技术文章 ${posts} 篇，项目 ${projects} 个。`);
+  const count = (collection: string) =>
+    entries.filter((entry) => entry.collection === collection).length;
+  const chapters = count('bookChapters');
+  const suffix = chapters > 0 ? `，书章节 ${chapters} 篇` : '';
+  console.log(
+    `已同步 ${entries.length} 篇草稿：技术文章 ${count('posts')} 篇，项目 ${count('projects')} 个，独立页面 ${count('pages')} 个${suffix}。`,
+  );
 }
 
 await main();

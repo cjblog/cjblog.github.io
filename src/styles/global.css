@@ -40,6 +40,8 @@
   --measure: 42rem;
   /* 详情页右侧目录列的宽度 */
   --toc-width: 15rem;
+  /* 书（多文件项目）左侧章节目录列的宽度 */
+  --book-width: 15rem;
 
   --font-ui: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
@@ -269,7 +271,11 @@ img {
 
 /* 模块切换用 CSS 的 :target，不依赖 JS —— 禁用 JS 时「技术文章」依然可达，
    内容也依然在文档里（对搜索引擎同样可见）。JS 只负责同步导航高亮。
-   用 :target 而不是 hidden 属性，切换发生在首次绘制之前，不会闪一下默认模块。 */
+   用 :target 而不是 hidden 属性，切换发生在首次绘制之前，不会闪一下默认模块。
+
+   ⚠️ .module 只给首页那两个模块用。它的默认值是 display: none，随手套到
+   别的页面上会让整页变成空白——而文字仍在 DOM 里，普通的内容断言照样通过，
+   只有可见性断言才抓得到。分页页与独立页面都用普通容器。 */
 .module {
   display: none;
 }
@@ -1031,5 +1037,218 @@ main:has(.module--posts:target) .module--projects {
   .card:hover,
   .rail__item a:hover {
     transform: none;
+  }
+}
+
+/* ==========================================================================
+   书：项目详情页的左侧章节目录
+   与文章目录（.toc）是两回事：.book 是整本书的章节，.toc 是当前文档的标题。
+   ========================================================================== */
+
+.detail--with-book {
+  max-width: calc(var(--measure) + var(--book-width) + var(--space-6));
+}
+
+.detail--with-book.detail--with-toc {
+  max-width: calc(
+    var(--measure) + var(--book-width) + var(--toc-width) + var(--space-6) * 2
+  );
+}
+
+/* 书目录占满整列（跨 header 与 body 两行），与正文左对齐 */
+.detail__layout--with-book {
+  grid-template-columns: var(--book-width) minmax(0, 1fr);
+  grid-template-areas:
+    'book header'
+    'book body';
+}
+
+.detail__layout--with-book.detail__layout--with-toc {
+  grid-template-columns: var(--book-width) minmax(0, 1fr) var(--toc-width);
+  grid-template-areas:
+    'book header toc'
+    'book body   toc';
+}
+
+.book {
+  grid-area: book;
+  position: sticky;
+  top: 5.5rem;
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  font-size: var(--text-xs);
+}
+
+.book__heading {
+  font-family: var(--font-prose);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.book__list,
+.book__sublist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--line);
+}
+
+/* 节的缩进：一层即可，两层目录不需要更深的层级感 */
+.book__sublist {
+  margin-left: var(--space-3);
+}
+
+.book__link {
+  display: block;
+  padding: var(--space-1) var(--space-3);
+  color: var(--ink-muted);
+  text-decoration: none;
+  line-height: 1.5;
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.book__link:hover {
+  color: var(--accent-deep);
+}
+
+.book__link[aria-current='true'] {
+  color: var(--accent-deep);
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+
+/* 章没有正文页也指不到任何地方时，只作为分组标题 */
+.book__link--plain {
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   分页
+   ========================================================================== */
+
+.pagination {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line);
+}
+
+.pagination__summary {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.pagination__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pagination__pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.pagination__step,
+.pagination__page {
+  display: block;
+  min-width: 2.25rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-block);
+  background-color: var(--surface);
+  color: var(--ink-muted);
+  text-align: center;
+  text-decoration: none;
+  font-size: var(--text-xs);
+  transition: transform 200ms var(--ease-bounce), border-color 200ms ease,
+    color 200ms ease;
+}
+
+.pagination__step:hover,
+.pagination__page:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+  color: var(--accent-deep);
+}
+
+.pagination__page[aria-current='page'] {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 首尾页上的「上一页 / 下一页」不可点，压暗但保留占位，避免控件跳动 */
+.pagination__step--disabled {
+  color: var(--ink-faint);
+  background-color: transparent;
+  border-style: dashed;
+}
+
+.pagination__gap {
+  padding-inline: var(--space-1);
+  color: var(--ink-faint);
+}
+
+/* ==========================================================================
+   书与目录的响应式
+   必须放在上面各段的定义之后：媒体查询不增加优先级，同优先级的规则
+   由源码顺序决定，写在前面会被覆盖掉。
+   ========================================================================== */
+
+/* 三栏放不下时，先收起「当前文档目录」，把它挪到正文上方 */
+@media (max-width: 1400px) {
+  .detail--with-book.detail--with-toc {
+    max-width: calc(var(--measure) + var(--book-width) + var(--space-6));
+  }
+
+  .detail__layout--with-book.detail__layout--with-toc {
+    grid-template-columns: var(--book-width) minmax(0, 1fr);
+    grid-template-areas:
+      'book header'
+      'book toc'
+      'book body';
+  }
+}
+
+/* 再窄就全部堆成一列，书目录与文档目录都变成正文上方的普通区块 */
+@media (max-width: 1080px) {
+  .detail--with-book,
+  .detail--with-book.detail--with-toc {
+    max-width: var(--measure);
+  }
+
+  .detail__layout--with-book,
+  .detail__layout--with-book.detail__layout--with-toc {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'header'
+      'book'
+      'toc'
+      'body';
+    gap: var(--space-5) 0;
+  }
+
+  .book,
+  .toc {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 }

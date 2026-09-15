@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Pagination from '../../../components/Pagination.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import {
+  buildPagination,
+  paginate,
+  paginatedPaths,
+  PROJECTS_PER_PAGE,
+} from '../../../lib/pagination';
+import { sortProjects } from '../../../lib/sort';
+
+/**
+ * 项目列表的第 2 页起。第 1 页在首页的「项目浏览」模块上（`/`），
+ * 所以这里只产出第 2 页以后，不会与首页重复。
+ */
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return paginatedPaths({
+    totalItems: projects.length,
+    perPage: PROJECTS_PER_PAGE,
+    prefix: 'projects',
+  });
+}
+
+const { current } = Astro.props;
+const projects = sortProjects(await getCollection('projects'));
+const pageItems = paginate(projects, current, PROJECTS_PER_PAGE);
+
+const pagination = buildPagination({
+  current,
+  totalItems: projects.length,
+  perPage: PROJECTS_PER_PAGE,
+  firstPageHref: '/',
+  basePath: '/projects/page',
+});
+---
+
+<BaseLayout title={`项目 · 第 ${current} 页`} active="projects">
+  {/*
+    这里不能用 class="module" —— 那个类属于首页的 :target 切换机制，
+    默认是 display: none，套上来整页会变成空白（而且文字仍在 DOM 里，
+    只有可见性断言才发现得了）。
+  */}
+  <section>
+    <div class="page__intro">
+      <h1 class="page__title">项目</h1>
+      <p class="page__lead">
+        第 {current} 页。第 1 页在<a href="/">首页</a>。
+      </p>
+    </div>
+
+    <div class="card-grid">
+      {pageItems.map((entry) => <ProjectCard slug={entry.id} data={entry.data} />)}
+    </div>
+
+    <Pagination pagination={pagination} noun="个项目" label="项目分页" />
+  </section>
+</BaseLayout>

@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogLayout from '../../../components/BlogLayout.astro';
+import Pagination from '../../../components/Pagination.astro';
+import {
+  buildPagination,
+  paginate,
+  paginatedPaths,
+  POSTS_PER_PAGE,
+} from '../../../lib/pagination';
+import { selectPinnedPosts, sortPostsByDateDesc } from '../../../lib/sort';
+
+/**
+ * 技术文章的第 2 页起。第 1 页在首页的「技术文章」模块上（`/#posts`）。
+ *
+ * 分页只对左栏的最新文章生效——置顶文章不算在内，它们在每一页的右栏
+ * 都照常显示，否则翻到第 2 页就找不到置顶文章了。
+ */
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const latest = posts.filter((post) => !post.data.pinned);
+  return paginatedPaths({
+    totalItems: latest.length,
+    perPage: POSTS_PER_PAGE,
+    prefix: 'posts',
+  });
+}
+
+const { current } = Astro.props;
+const posts = sortPostsByDateDesc(await getCollection('posts'));
+const pinned = selectPinnedPosts(posts);
+const latest = posts.filter((post) => !post.data.pinned);
+const pageItems = paginate(latest, current, POSTS_PER_PAGE);
+
+const pagination = buildPagination({
+  current,
+  totalItems: latest.length,
+  perPage: POSTS_PER_PAGE,
+  firstPageHref: '/#posts',
+  basePath: '/posts/page',
+});
+---
+
+<BaseLayout title={`技术文章 · 第 ${current} 页`} active="posts">
+  {/*
+    这里不能用 class="module" —— 那个类属于首页的 :target 切换机制，
+    默认是 display: none，套上来整页会变成空白。
+  */}
+  <section>
+    <div class="page__intro">
+      <h1 class="page__title">技术文章</h1>
+      <p class="page__lead">
+        第 {current} 页。第 1 页在<a href="/#posts">首页</a>。
+      </p>
+    </div>
+
+    <BlogLayout latest={pageItems} pinned={pinned} />
+
+    <Pagination pagination={pagination} noun="篇文章" label="文章分页" />
+  </section>
+</BaseLayout>
