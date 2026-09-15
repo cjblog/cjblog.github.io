@@ -23,6 +23,14 @@ const hasBook = outline.chapters.length > 0;
 
 const showToc = shouldShowToc(headings);
 
+/*
+ * 书页面**固定三栏**：即使这一页标题太少、右侧没有目录，也把那一列留着，
+ * 否则从有目录的页翻到没目录的页时整页宽度会跳一下。
+ * 单文件项目按常规处理，有目录才两栏。
+ */
+const withBook = hasBook;
+const withToc = hasBook || showToc;
+
 const price = entry.data.price;
 const priceNote =
   price.type === 'paid' ? '购买后含一年更新' : price.type === 'limited-free' ? '限时免费，之后会收费' : null;
@@ -36,8 +44,8 @@ const priceNote =
   <article
     class:list={[
       'detail',
-      showToc && 'detail--with-toc',
-      hasBook && 'detail--with-book',
+      withBook && 'detail--with-book',
+      withToc && 'detail--with-toc',
     ]}
   >
     <a class="detail__back" href="/">返回项目浏览</a>
@@ -45,8 +53,8 @@ const priceNote =
     <div
       class:list={[
         'detail__layout',
-        showToc && 'detail__layout--with-toc',
-        hasBook && 'detail__layout--with-book',
+        withBook && 'detail__layout--with-book',
+        withToc && 'detail__layout--with-toc',
       ]}
     >
       {

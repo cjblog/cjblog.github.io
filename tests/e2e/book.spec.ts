@@ -130,6 +130,54 @@ test.describe('书的章与节', () => {
   });
 });
 
+test.describe('书 · 目录吸顶与页面宽度', () => {
+  test('滚到页面底部时，左右两栏目录仍吸附在视野内', async ({ page }) => {
+    await page.goto('/projects/astro-guide/入门/为什么用-astro/');
+
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+
+    // 坏掉时这两块会跟着页面滑上去（y 变成很大的负数）。
+    // 根因是 grid 项默认 stretch 被拉到与容器等高，sticky 没有可移动余量。
+    for (const selector of ['.book', '.toc']) {
+      await expect(page.locator(selector), `${selector} 没能吸顶`).toBeVisible();
+      await expect
+        .poll(async () => Math.round((await page.locator(selector).boundingBox())!.y))
+        .toBeLessThan(150);
+    }
+  });
+
+  test('书的各个页面宽度完全一致', async ({ page }) => {
+    // 「入门」这一章只有一个标题、不显示右侧目录，正是之前会导致宽度跳变的情况
+    const urls = [
+      '/projects/astro-guide/',
+      '/projects/astro-guide/入门/',
+      '/projects/astro-guide/入门/为什么用-astro/',
+      '/projects/astro-guide/部署/',
+    ];
+
+    const widths: number[] = [];
+    for (const url of urls) {
+      await page.goto(url);
+      const box = await page.locator('.detail').boundingBox();
+      widths.push(Math.round(box!.width));
+    }
+
+    expect(new Set(widths).size, `各页宽度不一致：${widths.join(' / ')}`).toBe(1);
+  });
+
+  test('项目页宽度约为博客正文页的 1.1 倍', async ({ page }) => {
+    await page.goto('/posts/latex-common-syntax/');
+    const blogWidth = (await page.locator('.detail').boundingBox())!.width;
+
+    await page.goto('/projects/astro-guide/');
+    const projectWidth = (await page.locator('.detail').boundingBox())!.width;
+
+    const ratio = projectWidth / blogWidth;
+    expect(ratio, `项目页是博客页的 ${ratio.toFixed(2)} 倍`).toBeGreaterThan(1.05);
+    expect(ratio, `项目页是博客页的 ${ratio.toFixed(2)} 倍`).toBeLessThan(1.2);
+  });
+});
+
 test.describe('书 · 窄屏', () => {
   test.use({ viewport: { width: 700, height: 900 } });
 

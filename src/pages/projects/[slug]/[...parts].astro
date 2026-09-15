@@ -91,18 +91,14 @@ const showToc = shouldShowToc(headings);
 ---
 
 <BaseLayout title={title} description={`${project.data.title} · ${title}`} active="projects">
-  <article
-    class:list={['detail', showToc && 'detail--with-toc', 'detail--with-book']}
-  >
+  {/*
+    固定三栏：即使这一节标题太少、右侧没有目录，也把那一列留着，
+    否则在章与节之间跳转时整页宽度会跳一下。
+  */}
+  <article class="detail detail--with-book detail--with-toc">
     <a class="detail__back" href={`/projects/${project.id}/`}>返回 {project.data.title}</a>
 
-    <div
-      class:list={[
-        'detail__layout',
-        showToc && 'detail__layout--with-toc',
-        'detail__layout--with-book',
-      ]}
-    >
+    <div class="detail__layout detail__layout--with-book detail__layout--with-toc">
       <BookNav
         projectSlug={project.id}
         projectTitle={project.data.title}

@@ -335,6 +335,8 @@ checkout → setup-node → npm ci → npm run test → npm run build
 - **`sortPostsByDateDesc` 这类函数按 Astro `CollectionEntry` 的形状取值（`entry.data.date`），不是拍平的 `entry.date`。** 这里踩过一次：单测按拍平形状写全绿，但站点构建报「date 不是合法日期：undefined」。写涉及 entry 的工具函数时，测试数据也要用 `{ data: {...} }` 的形状。
 - `Array.prototype.sort` 在**只有一个元素时不调用比较器**，所以「日期非法就抛错」这类防御性校验，用单元素测试是测不出来的——测试至少要给两个元素。
 - 卡片用「链接只包住标题 + `::after` 铺满整卡」的写法（`ProjectCard.astro`），**不要**改成把整张卡片套进 `<a>`：那样读屏软件会把整卡内容念成一个链接名。
+- **grid 项上的 `position: sticky` 必须配 `align-self: start`。** grid 项默认 `align-self: stretch`，会被拉伸到与所在网格区域等高；元素和容器一样高时 sticky 没有任何可移动余量，效果**等于完全失效**——整块跟着页面滑走。目录列跨了 header 与 body 两行，这个坑尤其明显。`.toc`、`.book` 都靠这一行生效，`.rail` 则是因为 `.blog-layout` 上有 `align-items: start` 才正常。
+- **书的页面宽度必须固定，不能随「这一页有没有目录」变化。** 书页面固定三栏（`detail--with-book` 与 `detail--with-toc` 一起加），即使当前页标题太少、右侧没有目录也把那一列留着。否则从有目录的章翻到没目录的章，整页宽度会从 1040px 掉到 944px，跳得很明显。`tests/e2e/book.spec.ts` 里有「书的各个页面宽度完全一致」和「项目页宽度约为博客正文页的 1.1 倍」两条用例守着。
 - **`.module` 只给首页那两个模块用。** 它的默认值是 `display: none`（配合 `:target` 切换），随手套到别的页面上会让**整页变成空白**。危险之处在于文字仍在 DOM 里，`allTextContents()` 这类内容断言照样通过、构建也不报错，只有可见性断言（`toBeVisible`）才发现得了。分页页与独立页面都用普通容器。`tests/e2e/pagination.spec.ts` 里那条「第一页没有上一页，最后一页没有下一页」就是靠可见性抓到的。
 - **媒体查询不增加 CSS 优先级。** 同优先级的规则由源码顺序决定，所以「宽屏一套、窄屏覆盖」时，窄屏那段必须写在被覆盖的规则**之后**。踩过一次：`.toc` 的规则写在媒体查询之后，导致窄屏的 `position: static` 被后面的 `position: sticky` 盖掉，目录在正文上方还吸顶遮住内容。
 - **`astro preview` 不能用作 Playwright 的 `webServer` 命令**：Astro 7 的 preview 会把服务转入后台并让前台进程退出，Playwright 判定「exited early」直接失败，而且在 4321 上留下常驻守护进程，下次构建时端口被占（症状是 `Preview server already running`）。所以 `npm run preview` 指向自己写的 `scripts/serve-dist.mjs`，前台运行、无额外依赖。若确实误跑了 `astro preview`，用 `npx astro preview stop` 收尾。
