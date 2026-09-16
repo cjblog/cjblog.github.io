@@ -339,6 +339,29 @@ tests/                   ← 单元测试与端到端测试
 
 内容写错时 `npm run sync` 会**指出是哪个文件、哪一行有问题并中止**，不会产出一个残缺的站点。看到报错按提示改就行。
 
+### 停止本地服务
+
+`npm run dev` 和 `npm run preview` 都是**前台运行**的，在那个终端里按 `Ctrl+C` 就停了。
+
+服务跑在后台（例如启动它的终端窗口已经关掉）时，按端口找出来停掉：
+
+```bash
+lsof -nP -iTCP:4321 -sTCP:LISTEN              # 先看一眼是谁占着，确认没误伤
+lsof -ti:4321 -sTCP:LISTEN | xargs kill       # 停掉它
+```
+
+> **`-sTCP:LISTEN` 不能省。** 不加这个条件时，`lsof -ti:4321` 会把**连到**这个端口的客户端（比如开着 `localhost:4321` 的浏览器）一并列出来，`kill` 就会连浏览器标签页一起杀掉。只有监听方才是「占用端口的那个服务」。
+
+如果 `npx astro dev --background` 或 `npx astro preview --background` 留下了游离的守护进程，Astro 自带的命令更省事，也更不容易误伤：
+
+```bash
+npx astro preview status    # 先确认在不在跑
+npx astro preview stop      # 停掉后台的 preview 守护进程
+npx astro dev stop          # 同理，停 dev 守护进程
+```
+
+本项目的 `npm run preview` 跑的是 `scripts/serve-dist.mjs`，**前台运行**，所以平时用不到上面这些——`Ctrl+C` 就够了。它们主要是给后台启动的服务和游离守护进程兜底的。
+
 ---
 
 ## 部署
