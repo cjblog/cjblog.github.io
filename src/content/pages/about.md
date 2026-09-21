@@ -9,4 +9,4 @@ description: 非著名算法工程师，从事算法与大模型开发十余年�
 
 ## 联系
 
-![个人抖音](/images/douyin.png)
+<!-- ![个人抖音](/images/douyin.png) -->
