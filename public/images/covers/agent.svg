@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="agent-cover-title">
+  <title id="agent-cover-title">Agent 开发封面：机器人的大脑指挥手去调用工具</title>
+
+  <defs>
+    <linearGradient id="agent-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#122b44"/>
+      <stop offset="0.55" stop-color="#0f2438"/>
+      <stop offset="1" stop-color="#0a1a2b"/>
+    </linearGradient>
+    <radialGradient id="agent-glow">
+      <stop offset="0" stop-color="#a78bfa" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="agent-brain-glow">
+      <stop offset="0" stop-color="#a78bfa" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="agent-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+    <marker id="agent-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#agent-bg)"/>
+  <rect width="640" height="360" fill="url(#agent-grid)"/>
+  <ellipse cx="290" cy="175" rx="260" ry="165" fill="url(#agent-glow)"/>
+
+  <!-- 机器人：天线、耳、头壳 -->
+  <path d="M180 88V62" fill="none" stroke="#9dc0e2" stroke-opacity="0.6" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="180" cy="55" r="7" fill="#a78bfa"/>
+  <g fill="#ffffff" fill-opacity="0.04" stroke="#9dc0e2" stroke-opacity="0.5" stroke-width="2">
+    <rect x="84" y="146" width="12" height="46" rx="6"/>
+    <rect x="264" y="146" width="12" height="46" rx="6"/>
+    <rect x="96" y="88" width="168" height="176" rx="42"/>
+  </g>
+
+  <!-- 大脑：整个封面的视觉重心，唯一大片用点缀色的地方 -->
+  <ellipse cx="180" cy="150" rx="80" ry="64" fill="url(#agent-brain-glow)"/>
+  <path d="M180 190C150 192 124 174 124 150C124 124 146 110 180 110C214 110 236 124 236 150C236 174 210 192 180 190Z" fill="#a78bfa" fill-opacity="0.12" stroke="#a78bfa" stroke-opacity="0.9" stroke-width="2.5"/>
+  <path d="M180 114V186" fill="none" stroke="#a78bfa" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round"/>
+  <!-- 沟回要小而密。三道大弧左右对称时会被读成一对闭着的眼睛 -->
+  <g fill="none" stroke="#a78bfa" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round">
+    <path d="M152 120q10-8 17-1"/>
+    <path d="M134 136q11-9 20-1"/>
+    <path d="M128 158q11-9 20-1"/>
+    <path d="M144 178q10-8 18-1"/>
+    <path d="M208 120q-10-8-17-1"/>
+    <path d="M226 136q-11-9-20-1"/>
+    <path d="M232 158q-11-9-20-1"/>
+    <path d="M216 178q-10-8-18-1"/>
+  </g>
+
+  <!-- 眼与嘴：把「脸」这件事说死，大脑才不会被误读成表情 -->
+  <circle cx="154" cy="216" r="9" fill="#cfe4f7" fill-opacity="0.85"/>
+  <circle cx="206" cy="216" r="9" fill="#cfe4f7" fill-opacity="0.85"/>
+  <rect x="166" y="238" width="28" height="7" rx="3.5" fill="#cfe4f7" fill-opacity="0.5"/>
+
+  <!-- 脑 → 手的信号。虚线区别于实线的结构 -->
+  <g fill="none" stroke="#a78bfa" stroke-opacity="0.75" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="8 8">
+    <path d="M282 152C334 130 386 154 424 190" marker-end="url(#agent-arrow)"/>
+    <path d="M282 200C334 208 384 224 424 232" marker-end="url(#agent-arrow)"/>
+  </g>
+
+  <!-- 工具：齿轮 -->
+  <circle cx="470" cy="106" r="38" fill="#a78bfa" fill-opacity="0.08" stroke="#a78bfa" stroke-opacity="0.75" stroke-width="2.5"/>
+  <circle cx="470" cy="106" r="14" fill="none" stroke="#a78bfa" stroke-opacity="0.6" stroke-width="2.5"/>
+  <g stroke="#a78bfa" stroke-opacity="0.75" stroke-width="9" stroke-linecap="butt">
+    <path d="M508 106h10"/>
+    <path d="M496.9 132.9l7.1 7.1"/>
+    <path d="M470 144v10"/>
+    <path d="M443.1 132.9l-7.1 7.1"/>
+    <path d="M432 106h-10"/>
+    <path d="M443.1 79.1l-7.1-7.1"/>
+    <path d="M470 68V58"/>
+    <path d="M496.9 79.1l7.1-7.1"/>
+  </g>
+
+  <!-- 手：掌 + 三指 + 拇指，指尖搭在齿轮下缘 -->
+  <path d="M432 236C432 212 446 198 470 198C494 198 508 212 508 236C508 260 494 274 470 274C446 274 432 260 432 236Z" fill="#ffffff" fill-opacity="0.04" stroke="#9dc0e2" stroke-opacity="0.55" stroke-width="2.5"/>
+  <g fill="none" stroke="#9dc0e2" stroke-opacity="0.7" stroke-width="14" stroke-linecap="round">
+    <path d="M448 210C445 192 445 178 449 168"/>
+    <path d="M470 204C469 186 469 174 472 164"/>
+    <path d="M492 210C495 192 496 180 501 170"/>
+  </g>
+  <path d="M440 258C426 262 414 258 406 248" fill="none" stroke="#9dc0e2" stroke-opacity="0.7" stroke-width="13" stroke-linecap="round"/>
+
+  <circle cx="56" cy="313" r="4" fill="#a78bfa"/>
+  <text x="70" y="318" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" letter-spacing="3.5" fill="#a78bfa" fill-opacity="0.9">AGENT</text>
+</svg>

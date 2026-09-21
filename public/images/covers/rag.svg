@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="rag-cover-title">
+  <title id="rag-cover-title">RAG 开发封面：知识图谱向量化进入向量空间，按半径检索命中后生成回答</title>
+
+  <defs>
+    <linearGradient id="rag-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#122b44"/>
+      <stop offset="0.55" stop-color="#0f2438"/>
+      <stop offset="1" stop-color="#0a1a2b"/>
+    </linearGradient>
+    <radialGradient id="rag-glow">
+      <stop offset="0" stop-color="#3ecfc4" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#3ecfc4" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="rag-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+    <marker id="rag-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#3ecfc4"/>
+    </marker>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#rag-bg)"/>
+  <rect width="640" height="360" fill="url(#rag-grid)"/>
+  <ellipse cx="350" cy="180" rx="280" ry="160" fill="url(#rag-glow)"/>
+
+  <!-- 左：知识库。节点是知识条目，连线是它们之间的关联 -->
+  <g fill="none" stroke="#9dc0e2" stroke-opacity="0.4" stroke-width="2">
+    <path d="M72 130L134 112M72 130L62 198M72 130L120 190M134 112L172 158M134 112L120 190"/>
+    <path d="M172 158L166 228M62 198L120 190M62 198L92 248M120 190L166 228M120 190L92 248"/>
+  </g>
+  <g fill="none" stroke="#3ecfc4" stroke-opacity="0.45" stroke-width="2">
+    <path d="M172 158L120 190M120 190L92 248"/>
+  </g>
+  <g fill="#0f2438" stroke="#9dc0e2" stroke-opacity="0.55" stroke-width="2">
+    <circle cx="72" cy="130" r="10"/>
+    <circle cx="134" cy="112" r="8"/>
+    <circle cx="172" cy="158" r="11"/>
+    <circle cx="62" cy="198" r="9"/>
+    <circle cx="120" cy="190" r="12"/>
+    <circle cx="166" cy="228" r="8"/>
+    <circle cx="92" cy="248" r="7"/>
+  </g>
+
+  <!-- 向量化：知识条目各自变成空间里的一个点 -->
+  <g fill="none" stroke="#9dc0e2" stroke-opacity="0.5" stroke-width="2" stroke-linecap="round">
+    <path d="M142 116C190 118 240 122 302 128"/>
+    <path d="M183 158C214 162 244 168 282 172"/>
+    <path d="M174 228C212 232 250 234 292 232"/>
+  </g>
+
+  <!-- 中：向量空间。散点是全部向量，圆内是检索半径，命中三个 -->
+  <rect x="244" y="76" width="212" height="208" rx="18" fill="#3ecfc4" fill-opacity="0.05" stroke="#9dc0e2" stroke-opacity="0.35" stroke-width="2"/>
+  <g stroke="#9dc0e2" stroke-opacity="0.18" stroke-width="1.5">
+    <path d="M244 180H456"/>
+    <path d="M350 76V284"/>
+  </g>
+  <g fill="#9dc0e2" fill-opacity="0.35">
+    <circle cx="274" cy="110" r="3.5"/>
+    <circle cx="306" cy="132" r="3.5"/>
+    <circle cx="404" cy="108" r="3.5"/>
+    <circle cx="434" cy="140" r="3.5"/>
+    <circle cx="280" cy="168" r="3.5"/>
+    <circle cx="314" cy="196" r="3.5"/>
+    <circle cx="432" cy="190" r="3.5"/>
+    <circle cx="290" cy="232" r="3.5"/>
+    <circle cx="394" cy="244" r="3.5"/>
+    <circle cx="276" cy="206" r="3.5"/>
+    <circle cx="414" cy="262" r="3.5"/>
+    <circle cx="346" cy="104" r="3.5"/>
+  </g>
+  <circle cx="362" cy="168" r="52" fill="none" stroke="#3ecfc4" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="7 7"/>
+  <g fill="none" stroke="#3ecfc4" stroke-opacity="0.5" stroke-width="2">
+    <path d="M362 168L324 140M362 168L394 152M362 168L342 212"/>
+  </g>
+  <g fill="#3ecfc4">
+    <circle cx="324" cy="140" r="6.5"/>
+    <circle cx="394" cy="152" r="6.5"/>
+    <circle cx="342" cy="212" r="6.5"/>
+    <circle cx="362" cy="168" r="8"/>
+  </g>
+
+  <!-- 右：生成回答 -->
+  <path d="M460 178C468 178 474 178 484 178" fill="none" stroke="#3ecfc4" stroke-opacity="0.8" stroke-width="2.5" stroke-linecap="round" marker-end="url(#rag-arrow)"/>
+  <rect x="500" y="140" width="118" height="76" rx="16" fill="#122a40" stroke="#3ecfc4" stroke-opacity="0.6" stroke-width="2"/>
+  <path d="M500 170L484 178L500 186Z" fill="#122a40"/>
+  <path d="M500 170L484 178L500 186" fill="none" stroke="#3ecfc4" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="none" stroke="#3ecfc4" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round">
+    <path d="M520 170h66"/>
+    <path d="M520 190h46"/>
+  </g>
+
+  <circle cx="56" cy="313" r="4" fill="#3ecfc4"/>
+  <text x="70" y="318" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" letter-spacing="3.5" fill="#3ecfc4" fill-opacity="0.9">RAG</text>
+</svg>

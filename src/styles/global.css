@@ -34,17 +34,22 @@
   --space-7: 3rem;
   --space-8: 4rem;
 
-  --page-width: 1120px;
+  /* 页面容器宽度。书页面是三栏，要放得下 42 + 13 + 13 + 1.5×2 = 71rem = 1136px 的
+     正文区，加上 .page 左右各 24px 的内边距正好 1184px。
+     ⚠️ 这个值卡得很紧：书页需要多少，这里就得有多少，差一点就会被容器截住，
+     而多出来的部分是从正文列扣的——正文会悄悄窄于 --measure，且不报任何错。 */
+  --page-width: 1184px;
   --blog-width: 1080px;
   /* 约 40 个汉字一行，中文正文的舒适区 */
   --measure: 42rem;
-  /* 详情页右侧目录列的宽度 */
-  --toc-width: 15rem;
+  /* 详情页右侧目录列的宽度。博客文章页与单文件项目页共用这一个变量 */
+  --toc-width: 19.5rem;
   /* 书（多文件项目）的列宽。
-     书页面是三栏，比博客正文页（42 + 15 + 2 = 59rem）宽，但不该宽太多，
-     所以这两个列刻意收窄：42 + 10 + 10 + 1.5×2 = 65rem，约为博客页的 110%。 */
-  --book-width: 10rem;
-  --toc-width-compact: 10rem;
+     书页面是三栏，比博客正文页（42 + 19.5 + 2 = 63.5rem）宽，但不该宽太多，
+     所以这两个列刻意收窄：42 + 13 + 13 + 1.5×2 = 71rem，约为博客页的 112%。
+     两侧都比 --toc-width 窄是刻意的：三栏时两侧若都按 --toc-width 算，正文列会被挤扁。 */
+  --book-width: 13rem;
+  --toc-width-compact: 13rem;
 
   --font-ui: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;

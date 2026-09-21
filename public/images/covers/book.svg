@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="book-cover-title">
+  <title id="book-cover-title">书籍类项目封面：摊开的书与左侧两级章节目录</title>
+
+  <defs>
+    <linearGradient id="book-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#122b44"/>
+      <stop offset="0.55" stop-color="#0f2438"/>
+      <stop offset="1" stop-color="#0a1a2b"/>
+    </linearGradient>
+    <radialGradient id="book-glow">
+      <stop offset="0" stop-color="#e0a955" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#e0a955" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="book-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#book-bg)"/>
+  <rect width="640" height="360" fill="url(#book-grid)"/>
+  <ellipse cx="392" cy="196" rx="230" ry="150" fill="url(#book-glow)"/>
+
+  <!-- 左：章节目录，两级。呼应站点里书页面的左侧导航 -->
+  <path d="M76 126V244" fill="none" stroke="#9dc0e2" stroke-opacity="0.35" stroke-width="1.5"/>
+  <g fill="#9dc0e2" fill-opacity="0.28">
+    <rect x="90" y="130" width="88" height="10" rx="5"/>
+    <rect x="104" y="182" width="54" height="10" rx="5"/>
+    <rect x="104" y="206" width="46" height="10" rx="5"/>
+    <rect x="90" y="230" width="82" height="10" rx="5"/>
+  </g>
+  <!-- 当前所在的那一章。夹在中间才读得出是「高亮项」，放末尾会像一条下划线 -->
+  <rect x="90" y="158" width="70" height="10" rx="5" fill="#e0a955" fill-opacity="0.9"/>
+
+  <!-- 右：摊开的书。书页上下缘带弧度，不然只是个平行四边形 -->
+  <path d="M392 140C344 128 294 120 246 116L246 252C294 256 344 264 392 276Z" fill="#ffffff" fill-opacity="0.03" stroke="#9dc0e2" stroke-opacity="0.5" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M392 140C440 128 490 120 538 116L538 252C490 256 440 264 392 276Z" fill="#ffffff" fill-opacity="0.03" stroke="#9dc0e2" stroke-opacity="0.5" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M392 140V276" fill="none" stroke="#9dc0e2" stroke-opacity="0.55" stroke-width="2"/>
+
+  <!-- 正文行 -->
+  <g fill="none" stroke="#9dc0e2" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round">
+    <path d="M272 156h94"/>
+    <path d="M272 180h80"/>
+    <path d="M272 204h94"/>
+    <path d="M272 228h62"/>
+    <path d="M418 156h94"/>
+    <path d="M418 204h94"/>
+    <path d="M418 228h56"/>
+  </g>
+  <!-- 当前所在的那一章 -->
+  <path d="M418 180h78" fill="none" stroke="#e0a955" stroke-opacity="0.85" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- 书签：窄，且从书页上缘探出去一截，不然只是一道压在页面上的竖杠 -->
+  <path d="M400 118h12v78l-6-10-6 10Z" fill="#e0a955" fill-opacity="0.9"/>
+
+  <circle cx="56" cy="313" r="4" fill="#e0a955"/>
+  <text x="70" y="318" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" letter-spacing="3.5" fill="#e0a955" fill-opacity="0.9">BOOK</text>
+</svg>

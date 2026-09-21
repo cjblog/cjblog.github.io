@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="llm-cover-title">
+  <title id="llm-cover-title">大模型封面：大脑轮廓内部是一张稠密的神经网络，底部有输入汇入</title>
+
+  <defs>
+    <linearGradient id="llm-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#122b44"/>
+      <stop offset="0.55" stop-color="#0f2438"/>
+      <stop offset="1" stop-color="#0a1a2b"/>
+    </linearGradient>
+    <radialGradient id="llm-glow">
+      <stop offset="0" stop-color="#5aa6f2" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#5aa6f2" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="llm-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#llm-bg)"/>
+  <rect width="640" height="360" fill="url(#llm-grid)"/>
+  <ellipse cx="320" cy="168" rx="250" ry="170" fill="url(#llm-glow)"/>
+
+  <!-- 大脑轮廓。左右半球各自闭合，闭合边正好落在中线上，成了纵裂 -->
+  <g fill="#ffffff" fill-opacity="0.03" stroke="#9dc0e2" stroke-opacity="0.5" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M320 60C296 50 268 56 254 74C232 70 210 84 206 106C186 112 176 134 184 154C172 168 176 194 194 204C198 228 220 244 246 242C266 252 298 252 320 244Z"/>
+    <path d="M320 60C344 50 372 56 386 74C408 70 430 84 434 106C454 112 464 134 456 154C468 168 464 194 446 204C442 228 420 244 394 242C374 252 342 252 320 244Z"/>
+  </g>
+
+  <!-- 神经网络：连线先画，节点压在上面，交叉处才不会糊 -->
+  <g fill="none" stroke="#9dc0e2" stroke-opacity="0.28" stroke-width="1.6">
+    <path d="M250 100L300 80M300 80L350 84M350 84L398 106"/>
+    <path d="M250 100L282 122M300 80L282 122M282 122L330 116"/>
+    <path d="M398 106L378 138M232 140L282 122M232 140L258 176"/>
+    <path d="M378 138L420 152M378 138L398 182M420 152L438 130"/>
+    <path d="M258 176L306 158M258 176L284 210M306 158L352 160M352 160L398 182"/>
+    <path d="M398 182L378 216M284 210L332 204M332 204L378 216M310 240L348 238"/>
+    <path d="M232 140L222 176M222 176L258 176"/>
+  </g>
+  <g fill="none" stroke="#5aa6f2" stroke-opacity="0.5" stroke-width="1.8">
+    <path d="M282 122L306 158M306 158L332 204M330 116L378 138M332 204L310 240"/>
+  </g>
+
+  <!-- 输入汇入大脑 -->
+  <g fill="none" stroke="#9dc0e2" stroke-opacity="0.32" stroke-width="1.8" stroke-dasharray="7 7">
+    <path d="M250 283L284 210"/>
+    <path d="M300 283L310 240"/>
+    <path d="M350 283L348 238"/>
+    <path d="M400 283L378 216"/>
+  </g>
+
+  <g fill="#0f2438" stroke="#9dc0e2" stroke-opacity="0.55" stroke-width="1.8">
+    <circle cx="250" cy="100" r="6"/>
+    <circle cx="300" cy="80" r="7"/>
+    <circle cx="350" cy="84" r="6"/>
+    <circle cx="398" cy="106" r="7"/>
+    <circle cx="232" cy="140" r="6"/>
+    <circle cx="282" cy="122" r="7"/>
+    <circle cx="378" cy="138" r="6"/>
+    <circle cx="420" cy="152" r="6"/>
+    <circle cx="258" cy="176" r="7"/>
+    <circle cx="352" cy="160" r="6"/>
+    <circle cx="398" cy="182" r="7"/>
+    <circle cx="284" cy="210" r="6"/>
+    <circle cx="378" cy="216" r="6"/>
+    <circle cx="310" cy="240" r="6"/>
+    <circle cx="348" cy="238" r="6"/>
+    <circle cx="222" cy="176" r="6"/>
+    <circle cx="438" cy="130" r="6"/>
+  </g>
+
+  <g fill="#5aa6f2">
+    <circle cx="330" cy="116" r="8"/>
+    <circle cx="306" cy="158" r="8"/>
+    <circle cx="332" cy="204" r="7"/>
+  </g>
+
+  <g fill="#5aa6f2" fill-opacity="0.8">
+    <circle cx="250" cy="290" r="7"/>
+    <circle cx="300" cy="290" r="7"/>
+    <circle cx="350" cy="290" r="7"/>
+    <circle cx="400" cy="290" r="7"/>
+  </g>
+
+  <circle cx="56" cy="313" r="4" fill="#5aa6f2"/>
+  <text x="70" y="318" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" letter-spacing="3.5" fill="#5aa6f2" fill-opacity="0.9">LLM</text>
+</svg>

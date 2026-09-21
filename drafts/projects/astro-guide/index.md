@@ -5,6 +5,7 @@ tech: [Astro, TypeScript, Markdown]
 price:
   type: free
 order: 70
+
 ---
 
 > **这是示例项目**，同时用来演示「项目 = 一本书」：本目录下有多个 Markdown 文件时，
