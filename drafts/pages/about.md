@@ -9,4 +9,8 @@ description: 非著名算法工程师，从事算法与大模型开发十余年�
 
 ## 联系
 
-<!-- ![个人抖音](/images/douyin.png) -->
+- 微信：`JChen2110`
+- 邮箱：[vinctchanx@icloud.com](mailto:vinctchanx@icloud.com)
+- X：[@vinctchanx](https://x.com/vinctchanx)
+
+<img src="/images/douyin.webp" alt="抖音扫码关注：@思考快与慢" width="276" height="300">

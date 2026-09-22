@@ -92,6 +92,33 @@ test.describe('内容完整性', () => {
       expect(leaked, `${href} 漏出了反引号`).not.toContain('`');
     }
   });
+
+  /*
+   * 图片路径写错不会让构建失败，页面上只留一个破图标，跟 KaTeX 报错是同一类问题，
+   * 所以放在这个文件里一起扫。
+   */
+  test('正文里的图片都真的能加载，没有 404', async ({ page }) => {
+    const links = await collectDetailLinks(page);
+    expect(links.length).toBeGreaterThan(0);
+
+    const broken: string[] = [];
+    for (const href of links) {
+      await page.goto(href);
+
+      const srcs = await page
+        .locator('.prose img')
+        .evaluateAll((nodes) =>
+          nodes.map((node) => (node as HTMLImageElement).getAttribute('src') ?? ''),
+        );
+
+      for (const src of srcs.filter(Boolean)) {
+        const response = await page.request.get(new URL(src, page.url()).href);
+        if (!response.ok()) broken.push(`${href} → ${src}（${response.status()}）`);
+      }
+    }
+
+    expect(broken, `有图片加载不出来：\n${broken.join('\n')}`).toEqual([]);
+  });
 });
 
 test.describe('404 页', () => {
