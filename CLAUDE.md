@@ -96,6 +96,30 @@ sync 的职责是**校验并快速失败**：缺字段、`date` 非法、`paid` 
 
 KaTeX 的 CSS 只在详情页 import，Astro 按页拆 CSS——首页不含公式，就不该付这份体积。
 
+### 文章的示意图是正文里的内联 SVG
+
+图直接写在 markdown 里，**外层必须是 `<div class="diagram-scroll">`**（`global.css` 给它 `overflow-x: auto`），图保持固有宽度、窄屏靠容器横向滚动——和表格同一条策略，别给 svg 加 `max-width: 100%`，图里的标注与数字缩到 390px 就看不见了。SVG 的 `<text>` 不吃页面字体，靠 `.prose svg text` 统一成 `--font-ui`；颜色一律用 CSS 变量（`var(--ink)` 这类），跟随设计令牌走。
+
+⚠️ **`<div class="diagram-scroll">` 到 `</div>` 之间不能有空行。** markdown 的 HTML 块**遇到空行就结束**，之后 4 空格缩进的 `<rect>` / `<text>` 会被当成缩进代码块——页面上的图只剩一半，另一半变成一块代码。这个坑只数 svg 个数发现不了：裂开之后 `<svg>` 与 `.diagram-scroll` 的计数都还在，`grep` 也照样数得出图，只有图本身是坏的。e2e 里那条「示意图完整地渲染成图」断言的就是图内不许出现 `pre`。
+
+`stripMarkdown` 会把整块 `<svg>…</svg>` 删掉（`src/lib/markdown.ts`）——图里的文字是刻度与标签碎片，不删会混进字数统计和列表摘要。这条规则严格止于 `</svg>`，普通行内 HTML 仍照旧只剥标签、保留其间文字。
+
+### 文章之间互相引用：写相对的 `.md` 链接
+
+正文里引站内的另一篇 / 另一章，**写相对路径的 `.md` 链接**，构建期会改写成站上地址：
+
+```markdown
+[知识构建（一）](../第2章-知识库构建/03-知识构建一-PDF到205个知识点.md)
+```
+
+好处是源 md 在编辑器与 GitHub 上照样点得开。映射规则集中在 `src/lib/links.ts` 的 `contentPathToUrl`，**不要手写站上地址**——那三条规则（去 `.md`、章 / 节的文件名去数字前缀、补 `/projects/<书>/` 这一层）每加一节都要重算，算错不会有人报错。
+
+⚠️ `npm run sync` 会在书的章 / 节前插一层 `chapters/`，作者在 `drafts/` 下看不到它，**相对链接是按没有它写的**。所以 `rewriteContentLink` 解析前先用 `toDraftsPath()` 把这一层摘掉。漏了这一步，`../` 会多跳一层——链接在源文件里对、在站上错，构建一点也不报。
+
+⚠️ **插件挂到 `astro.config.mjs` 时必须当裸函数传**（`remarkPlugins: [remarkRewriteContentLinks]`）。写成 `[plugin, options]` 元组的话，元组会在 Astro 的配置传递里**被静默丢掉**：插件一次都不执行，构建照常成功，页面上一条链接都没改。所以内容根是从模块自身位置推导的，不走参数。这个坑是实测出来的，别照抄别的 unified 配置。
+
+改写器**只按路径形状映射，不检查目标存不存在**。写错的相对路径会给出一份看着像模像样的错地址——这正是 e2e 里那条「正文里的站内链接都能打开」存在的意义。发现断链时先查源文件里的相对路径，别去改插件。
+
 ### 首页模块切换用 CSS `:target`，不是 JS
 
 两个模块 `#projects` / `#posts` **都渲染进 HTML**，靠 `:target` 切换，**默认「项目浏览」**。禁 JS 时「技术文章」依然可达、内容也依然在文档里。JS 只做一件事：同步导航的 `aria-current`。
@@ -218,6 +242,8 @@ PLAYWRIGHT_BASE_URL=https://cjblog.github.io npx playwright test
 
 不看就会重犯的几条：
 
+- **正文里手写的 HTML 块（示意图、自定义容器）内部不能有空行。** markdown 的 HTML 块遇到空行就结束，块内空行之后的 4 空格缩进内容会被解析成缩进代码块。症状是页面上的图裂成两半、构建却完全成功。详见「文章的示意图是正文里的内联 SVG」。
+- **remark 插件在 `astro.config.mjs` 里只能当裸函数挂载，不能写成 `[plugin, options]` 元组。** 元组会被静默丢掉，插件根本不执行，而构建一切正常。详见「文章之间互相引用」。
 - **grid 项上的 `position: sticky` 必须配 `align-self: start`。** grid 项默认 `align-self: stretch`，会被拉伸到与所在网格区域等高；元素和容器一样高时 sticky 没有任何可移动余量，效果**等于完全失效**（整块跟着页面滑走）。`.toc`、`.book` 都靠这一行生效。
 - **书的页面宽度必须固定，不能随「这一页有没有目录」变化。** 书页固定三栏（`detail--with-book` 与 `detail--with-toc` 一起加），即使当前页标题太少、右侧没目录也把那一列留着，否则从有目录的章翻到没目录的章，整页宽度会从 1136px 掉到 1016px。改书页列宽时要连 `--page-width` 一起验算：书页正文区 71rem = 1136px 正好是容器可用宽度，差一点就会被截住、转而吃掉正文列，且不报任何错。
 - **`.module` 只给首页那两个模块用。** 它默认值是 `display: none`（配合 `:target` 切换），随手套到别的页面上会让**整页变成空白**——危险之处在于文字仍在 DOM 里，`allTextContents()` 这类内容断言照样通过、构建也不报错，只有可见性断言（`toBeVisible`）才发现得了。

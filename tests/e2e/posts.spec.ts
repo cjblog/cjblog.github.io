@@ -224,6 +224,48 @@ test.describe('文章全文页', () => {
     }
   });
 
+  test('全文页的示意图完整地渲染成图', async ({ page }) => {
+    /*
+     * 两件事一起断言，缺一不可：
+     *
+     * 1. 每张图都被 .diagram-scroll 包住。与表格同一条理由——图保持固有宽度、
+     *    由容器横向滚动，裸放在正文里的 <svg> 没有任何宽度约束，窄屏会撑破页面。
+     * 2. 图里不能出现代码块。示意图是手写的原始 HTML，而 markdown 的 HTML 块
+     *    **遇到空行就结束**，块内一有空行，后面 4 空格缩进的 <rect>/<text> 就会
+     *    被解析成缩进代码块。症状是页面上的图只剩一半，另一半变成一块代码。
+     *
+     *    这个坑只数 svg 的个数是发现不了的：裂开后 <svg> 与 .diagram-scroll
+     *    的计数都还在，只有图本身是坏的。所以这里额外断言图里没有 pre。
+     *
+     * 注意「示意图」不是「所有的 svg」：KaTeX 的根号就是一个内联 svg，
+     * 正文里每出现一次 \sqrt 就多一个。按 .prose svg 去数会把它们全算成漏包的图。
+     */
+    const href = await findPostWhere(
+      page,
+      async (p) => (await p.locator('.prose .diagram-scroll svg').count()) > 0,
+    );
+    if (!href) {
+      test.skip(true, '站内没有含示意图的文章');
+      return;
+    }
+
+    await page.goto(href);
+
+    // 排除 KaTeX 的根号：它也是 svg，但由公式渲染产出，不受正文排版约束
+    const unwrapped = await page
+      .locator('.prose svg')
+      .evaluateAll(
+        (nodes) =>
+          nodes.filter((node) => !node.closest('.katex') && !node.closest('.diagram-scroll')).length,
+      );
+    expect(unwrapped, `${href} 有 ${unwrapped} 张图没被 .diagram-scroll 包住，窄屏会被撑破`).toBe(0);
+
+    const swallowed = await page
+      .locator('.prose .diagram-scroll')
+      .evaluateAll((nodes) => nodes.filter((node) => node.querySelector('pre, .astro-code')).length);
+    expect(swallowed, `${href} 有 ${swallowed} 张图里混进了代码块，说明图被 markdown 拆开了`).toBe(0);
+  });
+
   test('全文页显示完整的元信息', async ({ page }) => {
     // 不再绑定某一篇：第一篇有元信息的文章即可，断言的是字段格式
     await page.goto('/#posts');
@@ -264,5 +306,31 @@ test.describe('文章全文页', () => {
 
     await expect(page).toHaveURL(/#posts$/);
     await expect(page.locator('#posts')).toBeVisible();
+  });
+});
+
+test.describe('技术文章窄屏', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('每一篇全文页都不出现整页横向滚动', async ({ page }) => {
+    /*
+     * 宽表格与示意图各自靠容器横向滚动，页面本身不该被撑宽。
+     * 逐篇扫而不是挑一篇来断言：撑破页面的元素可能只长在其中某一篇里，
+     * 而这里要守的是「任何一篇都不许撑破」。
+     */
+    const hrefs = await collectPostHrefs(page);
+    expect(hrefs.length).toBeGreaterThan(0);
+
+    const offenders: string[] = [];
+
+    for (const href of hrefs) {
+      await page.goto(href);
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      if (overflow > 1) offenders.push(`${href} 横向溢出 ${overflow}px`);
+    }
+
+    expect(offenders).toEqual([]);
   });
 });

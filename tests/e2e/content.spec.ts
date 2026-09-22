@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { parseInternalTarget } from '../../src/lib/links';
 
 /**
  * 内容完整性检查：不针对某个具体页面，而是把站内所有详情页扫一遍。
@@ -29,7 +30,25 @@ async function collectDetailLinks(page: import('@playwright/test').Page): Promis
       ),
   );
 
-  return [...new Set([...contentLinks, ...pageLinks])];
+  /*
+   * 书的章 / 节不在首页卡片里，得从每本书的目录导航补进来。
+   * 补这一步是必须的：书内的互引是站内链接里最容易写错的地方——
+   * 相对路径、文件名数字前缀两条规则叠在一起，而错法在站上表现为 404，
+   * 在源文件里却看着一切正常。只扫首页能走到的详情页，这些全都扫不到。
+   */
+  const bookLinks: string[] = [];
+  for (const href of contentLinks.filter((link) => link.startsWith('/projects/'))) {
+    await page.goto(href);
+    bookLinks.push(
+      ...(await page.locator('.book__link[href]').evaluateAll((nodes) =>
+        nodes
+          .map((node) => node.getAttribute('href'))
+          .filter((link): link is string => Boolean(link) && link.startsWith('/')),
+      )),
+    );
+  }
+
+  return [...new Set([...contentLinks, ...pageLinks, ...bookLinks])];
 }
 
 test.describe('内容完整性', () => {
@@ -91,6 +110,72 @@ test.describe('内容完整性', () => {
       // 一个落单的反引号会和文档后面某个反引号配成一对，把中间大段内容吞掉。
       expect(leaked, `${href} 漏出了反引号`).not.toContain('`');
     }
+  });
+
+  /*
+   * 文章互相引用时，链接写错、目标文章改名、锚点写错，都不会让构建失败：
+   * 页面上只留一个 404，或者一个跳过去却停在页首的死锚点。跟图片 404 是同一类
+   * 问题，所以放在这个文件里一起扫。
+   *
+   * 「哪种写法算站内、锚点怎么解码」这套规则在 src/lib/links.ts，
+   * 由 tests/unit/links.test.ts 覆盖——那部分有真实输入，不依赖站内是否已有链接。
+   * 这里只负责把规则套到真实页面上。
+   */
+  test('正文里的站内链接都能打开，锚点也都对得上', async ({ page }) => {
+    const links = await collectDetailLinks(page);
+    expect(links.length).toBeGreaterThan(0);
+
+    const broken: string[] = [];
+    let scanned = 0;
+
+    for (const href of links) {
+      await page.goto(href);
+      // 先记下当前页地址：下面查锚点时会跳走，之后再取就取到别的页面上去了
+      const base = page.url();
+
+      const rawHrefs = await page
+        .locator('.prose a[href]')
+        .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? ''));
+
+      for (const raw of rawHrefs) {
+        const target = parseInternalTarget(raw, new URL(base).pathname);
+        if (!target) continue;
+        scanned += 1;
+
+        const targetUrl = new URL(target.path, base);
+        const response = await page.request.get(targetUrl.href);
+
+        if (!response.ok()) {
+          broken.push(`${href} → ${raw}（${response.status()}）`);
+          continue;
+        }
+
+        if (!target.hash) continue;
+
+        /*
+         * 页面打得开不代表锚点对得上。标题的 id 是 Astro 的 slugger 从标题文字
+         * 算出来的，标题一改 id 就变，而链接不会跟着变——尤其是标题里带公式的
+         * 那几节，id 是一串谁也猜不出来的东西（如 `第-2-步缩放除以-dksqrtd_kdk`）。
+         */
+        await page.goto(`${targetUrl.href}#${encodeURIComponent(target.hash)}`);
+        const found = await page.evaluate(
+          (id) => document.getElementById(id) !== null,
+          target.hash,
+        );
+        if (!found) {
+          broken.push(`${href} → ${raw}（目标页上没有 id="${target.hash}" 的元素）`);
+        }
+      }
+    }
+
+    expect(broken, `有站内链接走不通：\n${broken.join('\n')}`).toEqual([]);
+
+    /*
+     * 必须断言真的扫到了东西。扫到 0 条时上面的断言一样全绿，
+     * 而「空转」和「查过且没问题」在报告里长得一模一样——这是最该避免的一种假绿。
+     * 站内链接被改没了、或者遍历逻辑失效，都会在这里现形。
+     */
+    expect(scanned, '正文里一条站内链接都没扫到，这条检查现在是空转的').toBeGreaterThan(0);
   });
 
   /*

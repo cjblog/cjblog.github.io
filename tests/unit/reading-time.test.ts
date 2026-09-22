@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  DEFAULT_WORDS_PER_MINUTE,
   countWords,
   estimateReadingMinutes,
   formatReadingTime,
@@ -70,14 +71,19 @@ describe('estimateReadingMinutes', () => {
     expect(estimateReadingMinutes(Number.NaN)).toBe(0);
   });
 
+  /*
+   * 这几条用 DEFAULT_WORDS_PER_MINUTE 换算，而不是写死 300 / 1500 这类数字：
+   * 断言的应该是「向上取整」这个行为，不该顺手把当时的阅读速度也钉进去
+   * ——否则以后每调一次速度都要来改一遍算术，改错了还看不出来。
+   */
   it('不足一分钟的按一分钟计', () => {
     expect(estimateReadingMinutes(1)).toBe(1);
-    expect(estimateReadingMinutes(300)).toBe(1);
+    expect(estimateReadingMinutes(DEFAULT_WORDS_PER_MINUTE)).toBe(1);
   });
 
   it('超过一分钟后向上取整', () => {
-    expect(estimateReadingMinutes(301)).toBe(2);
-    expect(estimateReadingMinutes(1500)).toBe(5);
+    expect(estimateReadingMinutes(DEFAULT_WORDS_PER_MINUTE + 1)).toBe(2);
+    expect(estimateReadingMinutes(DEFAULT_WORDS_PER_MINUTE * 5)).toBe(5);
   });
 
   it('可以覆盖阅读速度', () => {
@@ -100,10 +106,21 @@ describe('formatReadingTime', () => {
   });
 });
 
+describe('阅读速度', () => {
+  it('按 150 字/分钟估算', () => {
+    /*
+     * 这个数字是产品设定，会同时改掉列表项、文章详情页与书的章节页上
+     * 每一处「阅读 约 X 分钟」。钉在这里是为了让它**只能被有意识地改**
+     * ——顺手「修正」成一个更常见的值（比如 300）会让全站阅读时长悄悄腰斩。
+     */
+    expect(DEFAULT_WORDS_PER_MINUTE).toBe(150);
+  });
+});
+
 describe('readingStats', () => {
   it('一次性给出字数、分钟数与文案', () => {
-    const stats = readingStats('啊'.repeat(900));
-    expect(stats.wordCount).toBe(900);
+    const stats = readingStats('啊'.repeat(DEFAULT_WORDS_PER_MINUTE * 3));
+    expect(stats.wordCount).toBe(DEFAULT_WORDS_PER_MINUTE * 3);
     expect(stats.minutes).toBe(3);
     expect(stats.label).toBe('约 3 分钟');
   });

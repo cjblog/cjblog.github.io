@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import { unified } from '@astrojs/markdown-remark';
-import { mathRemarkPlugins, siteRehypePlugins } from './src/lib/markdown.ts';
+import { mathRemarkPlugins, remarkRewriteContentLinks, siteRehypePlugins } from './src/lib/markdown.ts';
 
 /**
  * 用户站点仓库，服务在根路径 —— 不要设置 base，
@@ -16,7 +16,11 @@ export default defineConfig({
   site: 'https://cjblog.github.io',
   markdown: {
     processor: unified({
-      remarkPlugins: mathRemarkPlugins,
+      remarkPlugins: [
+        ...mathRemarkPlugins,
+        // 相对 `.md` 链接 → 站上地址。见 src/lib/markdown.ts 的注释。
+        remarkRewriteContentLinks,
+      ],
       rehypePlugins: siteRehypePlugins,
     }),
     shikiConfig: { theme: 'github-light' },

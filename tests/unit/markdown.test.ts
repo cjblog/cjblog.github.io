@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { renderMarkdown, stripMarkdown } from '../../src/lib/markdown';
+import { createMarkdownProcessor, renderMarkdown, stripMarkdown } from '../../src/lib/markdown';
 
 /**
  * 这组用例跑的是 src/lib/markdown.ts 里的独立流水线。
@@ -86,6 +86,64 @@ describe('renderMarkdown 其它元素', () => {
   it('保留标题层级', () => {
     expect(renderMarkdown('## 二级标题')).toContain('<h2');
   });
+
+  it('保留正文里的内联 SVG 示意图与它的容器', () => {
+    // 图靠原始 HTML 画，流水线不能把它当危险内容吞掉
+    const html = renderMarkdown(
+      '<div class="diagram-scroll">\n<svg width="10" height="10"><rect width="10" height="10"/></svg>\n</div>',
+    );
+    expect(html).toContain('class="diagram-scroll"');
+    expect(html).toContain('<svg');
+    expect(html).toContain('<rect');
+  });
+});
+
+describe('内容链接改写', () => {
+  const contentRoot = '/repo/src/content';
+
+  /** 带上文件路径走一遍流水线——链接改写要拿到路径才有意义。 */
+  function renderFile(value: string, path: string): string {
+    return String(createMarkdownProcessor({ contentRoot }).processSync({ value, path }));
+  }
+
+  /** 渲染出来的 href 里中文是百分号编码的，比对前先解开，断言才读得懂。 */
+  function decodeHrefs(html: string): string {
+    return html.replace(/(href|src)="([^"]*)"/g, (_, attr: string, url: string) => {
+      try {
+        return `${attr}="${decodeURIComponent(url)}"`;
+      } catch {
+        return `${attr}="${url}"`;
+      }
+    });
+  }
+
+  it('书里相对的 .md 链接被改写成站上地址', () => {
+    const html = decodeHrefs(
+      renderFile(
+        '下一讲：[知识构建（一）](../第2章-知识库构建/03-知识构建一-PDF到205个知识点.md)',
+        `${contentRoot}/projects/书/chapters/第1章-项目概述/02-系统总览.md`,
+      ),
+    );
+
+    // 去掉了 .md、去掉了文件名数字前缀，也补上了 /projects/<书>/ 这一层
+    expect(html).toContain('href="/projects/书/第2章-知识库构建/知识构建一-PDF到205个知识点/"');
+    expect(html).not.toContain('.md');
+  });
+
+  it('没有文件路径时不改写，原文照旧', () => {
+    // renderMarkdown 只拿到一段字符串，无从判断相对路径的基准
+    const html = decodeHrefs(renderMarkdown('[下一讲](../第2章/03-x.md)'));
+    expect(html).toContain('href="../第2章/03-x.md"');
+  });
+
+  it('外链与图片不受影响', () => {
+    const html = decodeHrefs(
+      renderFile('[外链](https://example.com/a.md) ![图](./a.png)', `${contentRoot}/posts/x.md`),
+    );
+
+    expect(html).toContain('href="https://example.com/a.md"');
+    expect(html).toContain('src="./a.png"');
+  });
 });
 
 describe('stripMarkdown', () => {
@@ -138,6 +196,34 @@ describe('stripMarkdown', () => {
   it('HTML 标签与注释被去掉', () => {
     expect(stripMarkdown('<div>提示</div>')).toBe('提示');
     expect(stripMarkdown('文字 <!-- 注释 --> 继续')).toBe('文字 继续');
+  });
+
+  it('内联 SVG 整块去掉，图里的文字不会漏成正文', () => {
+    /*
+     * 示意图用内联 SVG 画，图里的 <text> 是坐标轴、刻度和矩阵里的数字，
+     * 不是可读的句子。只按「剥掉标签」处理的话它们会全部漏出来，
+     * 把字数统计与列表页摘要一起搅乱。
+     */
+    const md = [
+      '正文。',
+      '',
+      '<div class="diagram-scroll">',
+      '<svg width="100" height="20"><text x="1" y="1">QK 打分矩阵</text></svg>',
+      '</div>',
+    ].join('\n');
+
+    expect(stripMarkdown(md)).toBe('正文。');
+  });
+
+  it('SVG 之外的行内 HTML 仍然保留其间的文字', () => {
+    // 上一条规则不能宽到把普通行内标签也整块删掉
+    expect(stripMarkdown('前面 <span>重点</span> 后面')).toBe('前面 重点 后面');
+  });
+
+  it('两张图之间的正文不会被一起吃掉', () => {
+    // 删除规则必须严格止于各自的 </svg>，不能贪婪地跨过中间的段落
+    const md = '<svg><text>图一</text></svg>\n\n中间的话\n\n<svg><text>图二</text></svg>';
+    expect(stripMarkdown(md)).toBe('中间的话');
   });
 
   it('多余空白被压成单个空格', () => {

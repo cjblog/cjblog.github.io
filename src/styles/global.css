@@ -953,6 +953,27 @@ main:has(.module--posts:target) .module--projects {
   overflow-x: auto;
 }
 
+/* 示意图：策略与表格一致——图保持固有宽度，窄屏由容器横向滚动。
+   刻意**不**给 svg 加 max-width: 100%：图的标注与数字是图的一部分，
+   缩到 390px 宽会小到读不出来，滚动比缩成一团更可用。
+   `.prose > * + *` 已经负责图与上下文之间的间距，这里不再加 margin。 */
+.prose .diagram-scroll {
+  overflow-x: auto;
+}
+
+.prose .diagram-scroll > svg {
+  display: block;
+  /* 图比正文列窄时居中，与 .prose img 的处理一致；
+     容器进入横向滚动、图宽于容器时，auto 边距解析为 0，不会把图推到够不着的地方 */
+  margin-inline: auto;
+}
+
+/* SVG 的 <text> 默认走衬线正文体，与图外同为标签性质的说明文字不统一。
+   尺寸仍由各 text 元素的 font-size 属性决定，这里不覆盖。 */
+.prose svg text {
+  font-family: var(--font-ui);
+}
+
 .prose table {
   width: 100%;
   border-collapse: collapse;
