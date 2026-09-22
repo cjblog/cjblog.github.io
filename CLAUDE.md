@@ -184,6 +184,36 @@ checkout → setup-node → npm ci → npm run test → npm run build
 - `dist/` **不提交进仓库**，用 `.gitignore` 排除（连同 `node_modules/`、`test-results/`、`playwright-report/`）。
 - 仓库 Settings → Pages → Source 需要设为 **"GitHub Actions"**。这一步在 GitHub 网页上点，workflow 无法代劳——部署没生效先查这里。
 
+### 确认推送有没有真的上线
+
+**推送成功 ≠ 部署成功。** 两件事互相独立：`git push` 成功只说明提交到了 GitHub，
+线上要变还得等 workflow 跑完。踩过：本地远程都同步、`git status` 一切正常，
+但 workflow 挂在 e2e 上，线上整整停了一版。
+
+先看提交推上去没有（本地就能确认）：
+
+```bash
+git status -sb        # 第一行没有 ahead 字样，就是推上去了
+```
+
+再看 workflow 结果。本机没装 `gh`，用 GitHub 的公开 API：
+
+```bash
+curl -s "https://api.github.com/repos/cjblog/cjblog.github.io/actions/runs?per_page=3" | python3 -c "import json,sys
+for r in json.load(sys.stdin)['workflow_runs']:
+    print(r['created_at'][:19], r['status'], r['conclusion'], r['head_sha'][:7], r['display_title'][:30])"
+```
+
+**每次推送会触发两条记录，只认「Deploy to GitHub Pages」那条。** 另一条
+`pages build and deployment` 是 GitHub 内置的 Jekyll 构建，从建站起就一直失败，
+与本站的 Astro 构建无关，别被它的红叉吓到。
+
+最后确认线上真的变了——拿同一套 e2e 打线上，这是最硬的一条：
+
+```bash
+PLAYWRIGHT_BASE_URL=https://cjblog.github.io npx playwright test
+```
+
 ## 已知陷阱
 
 不看就会重犯的几条：
