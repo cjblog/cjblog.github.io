@@ -90,7 +90,9 @@ sync 的职责是**校验并快速失败**：缺字段、`date` 非法、`paid` 
 
 `remark-math` + `rehype-katex`，在构建期把 `$...$`（行内）与 `$$...$$`（行间）转成 KaTeX 的 HTML 标记，页面只引 CSS。**不要**在浏览器端跑 KaTeX 的 JS 渲染——公式会在首屏闪烁，也拖慢加载。代码块高亮同理。
 
-⚠️ **Astro 7 默认的 Markdown 处理器已不是 remark/rehype。** 它换成了 Sätteri，只把公式解析成 mdast 节点、不渲染 KaTeX。所以 `astro.config.mjs` 里必须显式用 `unified()`（来自 `@astrojs/markdown-remark`），否则公式会原样漏成 `$...$` 文本；旧的 `markdown.remarkPlugins` 写法已废弃。插件表从 `src/lib/markdown.ts` 取（`mathRemarkPlugins` / `katexRehypePlugins`），站点与单测共用同一组。GFM 由 Astro 自带，**不要**再塞 `remark-gfm`，会重复注册。
+⚠️ **Astro 7 默认的 Markdown 处理器已不是 remark/rehype。** 它换成了 Sätteri，只把公式解析成 mdast 节点、不渲染 KaTeX。所以 `astro.config.mjs` 里必须显式用 `unified()`（来自 `@astrojs/markdown-remark`），否则公式会原样漏成 `$...$` 文本；旧的 `markdown.remarkPlugins` 写法已废弃。插件表从 `src/lib/markdown.ts` 取（`mathRemarkPlugins` / `siteRehypePlugins`），站点与单测共用同一组。GFM 由 Astro 自带，**不要**再塞 `remark-gfm`，会重复注册。
+
+表格由 `rehypeWrapTables` 包进 `<div class="table-scroll">`——窄屏靠它横向滚动。这个类曾经只有 CSS、没有任何代码去加，宽表一直把页面撑出横向滚动（实测一个四列表格在 390px 视口下溢出 149px）。改 markdown 流水线时别把这个插件漏掉。
 
 KaTeX 的 CSS 只在详情页 import，Astro 按页拆 CSS——首页不含公式，就不该付这份体积。
 

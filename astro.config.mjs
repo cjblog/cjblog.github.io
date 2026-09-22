@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import { unified } from '@astrojs/markdown-remark';
-import { katexRehypePlugins, mathRemarkPlugins } from './src/lib/markdown.ts';
+import { mathRemarkPlugins, siteRehypePlugins } from './src/lib/markdown.ts';
 
 /**
  * 用户站点仓库，服务在根路径 —— 不要设置 base，
@@ -17,7 +17,7 @@ export default defineConfig({
   markdown: {
     processor: unified({
       remarkPlugins: mathRemarkPlugins,
-      rehypePlugins: katexRehypePlugins,
+      rehypePlugins: siteRehypePlugins,
     }),
     shikiConfig: { theme: 'github-light' },
   },

@@ -20,9 +20,56 @@ import rehypeStringify from 'rehype-stringify';
 export const mathRemarkPlugins = [remarkMath];
 export const katexRehypePlugins = [rehypeKatex];
 
+interface HastNode {
+  type: string;
+  tagName?: string;
+  properties?: Record<string, unknown>;
+  children?: HastNode[];
+}
+
+/** 递归地把 <table> 外面包一层容器，表格内部不再往下包。 */
+function wrapTables(node: HastNode): void {
+  if (!node.children) return;
+
+  for (let index = 0; index < node.children.length; index += 1) {
+    const child = node.children[index];
+    if (!child) continue;
+
+    if (child.type === 'element' && child.tagName === 'table') {
+      node.children[index] = {
+        type: 'element',
+        tagName: 'div',
+        properties: { className: ['table-scroll'] },
+        children: [child],
+      };
+    } else {
+      wrapTables(child);
+    }
+  }
+}
+
+/**
+ * 把正文里的 <table> 包进 <div class="table-scroll">。
+ *
+ * global.css 里 `.prose .table-scroll { overflow-x: auto }` 一直在，但**从来
+ * 没有代码加过这个类**——也就是说那句「宽表在窄屏上横向滚动，而不是把页面撑破」
+ * 一直是句空话。实测：一个四列表中文字格在 390px 视口下把页面撑出 149px 横向滚动。
+ */
+export function rehypeWrapTables() {
+  return (tree: HastNode): void => {
+    wrapTables(tree);
+  };
+}
+
+export const tableRehypePlugins = [rehypeWrapTables];
+
+/** Astro 侧（astro.config.mjs）用的 rehype 表。
+ *  与下面的独立流水线共用同一组，避免站点渲染与单测悄悄跑出两套行为。 */
+export const siteRehypePlugins = [...katexRehypePlugins, ...tableRehypePlugins];
+
 /** 独立流水线用的完整插件表（本站点的单测跑的就是它）。 */
 export const remarkPlugins = [remarkGfm, ...mathRemarkPlugins];
-export const rehypePlugins = [...katexRehypePlugins];
+export const rehypePlugins = [...siteRehypePlugins];
 
 export function createMarkdownProcessor() {
   return unified()
@@ -31,6 +78,7 @@ export function createMarkdownProcessor() {
     .use(remarkMath)
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeKatex)
+    .use(rehypeWrapTables)
     .use(rehypeStringify, { allowDangerousHtml: true });
 }
 

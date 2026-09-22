@@ -4,7 +4,7 @@ import { renderMarkdown, stripMarkdown } from '../../src/lib/markdown';
 /**
  * 这组用例跑的是 src/lib/markdown.ts 里的独立流水线。
  * 站点渲染走 Astro 的 unified() 处理器，插件取自同一组导出
- * （mathRemarkPlugins / katexRehypePlugins），所以这里验证的插件行为
+ * （mathRemarkPlugins / siteRehypePlugins），所以这里验证的插件行为
  * 就是站点上跑的那套；页面上的最终效果另由 e2e 兜底。
  */
 describe('renderMarkdown 公式', () => {
@@ -54,6 +54,17 @@ describe('renderMarkdown 其它元素', () => {
   it('表格的居中对齐被保留', () => {
     const html = renderMarkdown('| a |\n| :-: |\n| 1 |');
     expect(html).toContain('align="center"');
+  });
+
+  it('表格被包进 .table-scroll，窄屏才滚得动而不是撑破页面', () => {
+    // global.css 里 .prose .table-scroll 有 overflow-x: auto，
+    // 这个类此前从没有代码去加，宽表一直是把页面撑出横向滚动的
+    const html = renderMarkdown('| a | b |\n| --- | --- |\n| 1 | 2 |');
+    expect(html).toContain('<div class="table-scroll"><table>');
+  });
+
+  it('没有表格时不会凭空多出容器', () => {
+    expect(renderMarkdown('只有一段普通文字。')).not.toContain('table-scroll');
   });
 
   it('保留图片的路径与 alt', () => {
