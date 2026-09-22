@@ -29,16 +29,30 @@ async function collectProjectHrefs(page: Page): Promise<string[]> {
   return hrefs;
 }
 
+/**
+ * 找第一个满足条件的项目详情页；找不到返回 null，由调用方 skip。
+ *
+ * 断言模板行为时用这个，而不是「逐个项目页都断言一遍」——后者会让用例随
+ * 项目 / 文章数量越来越慢，卡住部署的往往还是某一篇内容里的笔误。
+ * 见 CLAUDE.md 的「测功能，不测内容」。
+ */
+async function findProjectWhere(
+  page: Page,
+  matches: (candidate: Page) => Promise<boolean>,
+): Promise<string | null> {
+  for (const href of await collectProjectHrefs(page)) {
+    await page.goto(href);
+    if (await matches(page)) return href;
+  }
+  return null;
+}
+
 /** 找一个指定价格类型的项目页。站内没有就返回 null，由调用方 skip。 */
 async function findProjectWithPriceType(
   page: Page,
   type: 'free' | 'limited-free' | 'paid',
 ): Promise<string | null> {
-  for (const href of await collectProjectHrefs(page)) {
-    await page.goto(href);
-    if ((await page.locator(`.price-badge--${type}`).count()) > 0) return href;
-  }
-  return null;
+  return findProjectWhere(page, async (p) => (await p.locator(`.price-badge--${type}`).count()) > 0);
 }
 
 test.describe('项目卡片', () => {
@@ -201,26 +215,26 @@ test.describe('卡片详情页', () => {
   test('项目详情页的结构元素渲染正确', async ({ page }) => {
     /*
      * 原版写死 /projects/llm-wiki/ 并要求它有表格、图片、公式——那是示例项目的属性。
-     * 这里改为遍历站内所有项目详情页，逐个断言**模板层面的不变量**：
-     * 正文区在、表格被 .table-scroll 包住（否则窄屏会被撑破）、公式没有渲染报错。
-     * 「表格渲染成了真表格」这类正向断言由 posts.spec.ts 的 demo 文章页兜底。
+     * 现在找一篇带表格的项目页验**模板行为**：正文区在、表格被 .table-scroll 包住
+     * （否则窄屏会被撑破）、公式没有渲染报错。不逐个项目页扫一遍。
      */
-    const hrefs = await collectProjectHrefs(page);
-    expect(hrefs.length, '站内一个项目都没有').toBeGreaterThan(0);
-
-    for (const href of hrefs) {
-      await page.goto(href);
-
-      await expect(page.locator('.prose'), `${href} 没有正文区`).toBeVisible();
-
-      const tables = await page.locator('.prose table').count();
-      const wrapped = await page.locator('.prose .table-scroll > table').count();
-      expect(wrapped, `${href} 有 ${tables} 个表格，却只有 ${wrapped} 个被 .table-scroll 包住`).toBe(
-        tables,
-      );
-
-      await expect(page.locator('.katex-error'), `${href} 里有公式渲染报错`).toHaveCount(0);
+    const href = await findProjectWhere(page, async (p) => (await p.locator('.prose table').count()) > 0);
+    if (!href) {
+      test.skip(true, '站内没有含表格的项目详情页');
+      return;
     }
+
+    await page.goto(href);
+
+    await expect(page.locator('.prose'), `${href} 没有正文区`).toBeVisible();
+
+    const tables = await page.locator('.prose table').count();
+    const wrapped = await page.locator('.prose .table-scroll > table').count();
+    expect(wrapped, `${href} 有 ${tables} 个表格，却只有 ${wrapped} 个被 .table-scroll 包住`).toBe(
+      tables,
+    );
+
+    await expect(page.locator('.katex-error'), `${href} 里有公式渲染报错`).toHaveCount(0);
   });
 
   test('付费项目详情页显示付费标签', async ({ page }) => {
@@ -284,15 +298,22 @@ test.describe('窄视口', () => {
   });
 
   test('详情页的宽表格与公式不会撑破页面', async ({ page }) => {
-    // 逐个走项目详情页，而不是只看某一个写死的 slug
-    for (const href of await collectProjectHrefs(page)) {
-      await page.goto(href);
-
-      const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      );
-
-      expect(overflow, `${href} 在窄视口下横向溢出`).toBeLessThanOrEqual(1);
+    // 找一个带宽内容的项目页验容器，不逐个走一遍（也避免写死某个 slug）
+    const href = await findProjectWhere(
+      page,
+      async (p) => (await p.locator('.prose table, .prose .katex-display').count()) > 0,
+    );
+    if (!href) {
+      test.skip(true, '站内没有含宽内容的项目详情页');
+      return;
     }
+
+    await page.goto(href);
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+
+    expect(overflow, `${href} 在窄视口下横向溢出`).toBeLessThanOrEqual(1);
   });
 });

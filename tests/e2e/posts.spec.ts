@@ -312,25 +312,32 @@ test.describe('文章全文页', () => {
 test.describe('技术文章窄屏', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('每一篇全文页都不出现整页横向滚动', async ({ page }) => {
+  test('正文里有宽内容时，页面上不出现整页横向滚动', async ({ page }) => {
     /*
      * 宽表格与示意图各自靠容器横向滚动，页面本身不该被撑宽。
-     * 逐篇扫而不是挑一篇来断言：撑破页面的元素可能只长在其中某一篇里，
-     * 而这里要守的是「任何一篇都不许撑破」。
+     *
+     * 找一篇带宽内容的来验机制即可，不逐篇扫全站：撑破页面是**模板**的问题
+     * （容器没生效），一篇就能暴露；而「每篇都不许撑破」是内容巡检，
+     * 会让这条用例随文章数量越来越慢。见 CLAUDE.md 的「测功能，不测内容」。
      */
-    const hrefs = await collectPostHrefs(page);
-    expect(hrefs.length).toBeGreaterThan(0);
-
-    const offenders: string[] = [];
-
-    for (const href of hrefs) {
-      await page.goto(href);
-      const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      );
-      if (overflow > 1) offenders.push(`${href} 横向溢出 ${overflow}px`);
+    const href = await findPostWhere(
+      page,
+      async (p) => (await p.locator('.prose table, .prose .diagram-scroll').count()) > 0,
+    );
+    if (!href) {
+      test.skip(true, '站内没有含表格或示意图的文章');
+      return;
     }
 
-    expect(offenders).toEqual([]);
+    await page.goto(href);
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, `${href} 的页面被撑出了横向滚动`).toBeLessThanOrEqual(1);
+
+    // 容器生效的话，宽内容应该落在容器里而不是页面上
+    const containers = await page.locator('.prose .table-scroll, .prose .diagram-scroll').count();
+    expect(containers).toBeGreaterThan(0);
   });
 });
