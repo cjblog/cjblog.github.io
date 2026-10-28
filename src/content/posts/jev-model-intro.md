@@ -7,6 +7,7 @@ tags:
   - 意图识别
 ---
 
+## 项目地址
 
 > 通过网盘分享的文件：JEV 模型原理介绍
 > 链接: https://pan.baidu.com/s/17oIayhgsb7TtR3rr_XIqXQ?pwd=5ybe 提取码: 5ybe 
