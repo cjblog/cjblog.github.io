@@ -6,7 +6,12 @@ tags:
   - 决策模型
   - 意图识别
 ---
+> 通过网盘分享的文件：JEV 模型原理介绍
+链接: https://pan.baidu.com/s/17oIayhgsb7TtR3rr_XIqXQ?pwd=5ybe 提取码: 5ybe 
+视频及代码资料，链接过期请联系我
 
+> 项目代码
+https://github.com/JayChen123/jev-model-introduction.git
 
 用本地轻量化模型 `Qwen3.5-0.8B-JEV` 演示 JEV 的调用方式。纯脚本，不是服务，不需要 API Key。
 
@@ -552,3 +557,4 @@ else:               # 升级给大模型 / 人工
 本模型是 `Qwen3.5-0.8B` 蒸馏得到的决策模型，学生模型会复现教师模型的偏好和错误。
 官方 README 明确说明：90.40% 的指标是**与教师模型的一致性**，不是真人标注的准确率。
 用于高风险决策前，需要在自有标注数据上做验证并保留人工兜底。
+
