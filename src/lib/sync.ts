@@ -77,6 +77,25 @@ export const RESERVED_PAGE_SLUGS = new Set([
  */
 export const RESERVED_LIST_SLUGS = new Set(['page']);
 
+/**
+ * 目录里允许存在、但**不参与同步**的 markdown。
+ *
+ * `CLAUDE.md` 是给 AI 助手看的写作约定，不是文章。它必须待在被写作的目录里
+ * 才生效，可文件名带大写——按 slug 规则本来就写不成文章名。不特判的话，
+ * sync 会以「文件名必须是小写字母、数字与连字符」中止整次同步，
+ * 于是一份纯说明文件把 dev / build / 部署全挡住了。
+ *
+ * 只认这一个精确文件名，不做大小写折叠：`Claude.md` 这种既不是约定名、
+ * 又不是合法 slug 的文件仍然照常报错——静默跳过它才是真的坑。
+ */
+export const NON_DRAFT_FILES = new Set(['CLAUDE.md']);
+
+/** 这个文件名是否是要同步的草稿。`walk` 与单测共用，避免两处各写一套判断。 */
+export function isDraftFile(fileName: string): boolean {
+  if (!/\.md$/i.test(fileName)) return false;
+  return !NON_DRAFT_FILES.has(fileName);
+}
+
 export function planSync(files: readonly DraftFile[]): SyncPlan {
   const entries: SyncedEntry[] = [];
   const errors: SyncError[] = [];
