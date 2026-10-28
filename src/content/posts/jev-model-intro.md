@@ -7,11 +7,11 @@ tags:
   - 意图识别
 ---
 > 通过网盘分享的文件：JEV 模型原理介绍
-链接: https://pan.baidu.com/s/17oIayhgsb7TtR3rr_XIqXQ?pwd=5ybe 提取码: 5ybe 
-视频及代码资料，链接过期请联系我
+> 链接: https://pan.baidu.com/s/17oIayhgsb7TtR3rr_XIqXQ?pwd=5ybe 提取码: 5ybe 
+> 视频及代码资料，链接过期请联系我
 
 > 项目代码
-https://github.com/JayChen123/jev-model-introduction.git
+> https://github.com/JayChen123/jev-model-introduction.git
 
 用本地轻量化模型 `Qwen3.5-0.8B-JEV` 演示 JEV 的调用方式。纯脚本，不是服务，不需要 API Key。
 
